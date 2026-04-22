@@ -9,17 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
+    "dexie": "^3.2.7",
     "pinia": "^2.1.7",
-    "dexie": "^3.2.7"
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "@vitejs/plugin-vue": "^5.0.4",
+    "sass": "^1.72.0",
     "typescript": "^5.4.2",
     "vite": "^5.2.0",
     "vite-plugin-pwa": "^0.19.2",
-    "vue-tsc": "^2.0.6",
-    "sass": "^1.72.0"
+    "vue-tsc": "^2.0.6"
   }
 }
