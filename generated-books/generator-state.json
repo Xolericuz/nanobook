@@ -1,0 +1,606 @@
+{
+  "generatedCount": 100,
+  "books": [
+    {
+      "id": "imvf07hi9hmod6bvs4",
+      "title": "Sukunat ichidagi haqiqat",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-24T17:17:58.571Z"
+    },
+    {
+      "id": "btw9bfuahv4mod6c7go",
+      "title": "Sun'iy ong uyg'onishi",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-24T17:18:13.707Z"
+    },
+    {
+      "id": "ncne9cmrpbbmodnyq9j",
+      "title": "Ong labirinti",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:37.982Z"
+    },
+    {
+      "id": "v2ol2j6bfbmodnyq9r",
+      "title": "Yo'qolgan shahar",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:37.985Z"
+    },
+    {
+      "id": "fkurmscofpcmodnyq9u",
+      "title": "Marsdagi uyg'onish",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:37.989Z"
+    },
+    {
+      "id": "m3tv4fxtuhmodnyq9y",
+      "title": "0 dan start",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:37.994Z"
+    },
+    {
+      "id": "0zevct0yhlvomodnyqa3",
+      "title": "Sukunatdagi qichqiriq",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:37.998Z"
+    },
+    {
+      "id": "6xoz48mefntmodnyqa7",
+      "title": "Sehrli shahar",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.002Z"
+    },
+    {
+      "id": "c533dl7e7cemodnyqaa",
+      "title": "Izsiz yo'qolish",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.008Z"
+    },
+    {
+      "id": "d0arklzhvhwmodnyqah",
+      "title": "Tush ichidagi tush",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.013Z"
+    },
+    {
+      "id": "hhdkgy0brv5modnyqal",
+      "title": "Vaqt bilan suhbat",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.017Z"
+    },
+    {
+      "id": "7xr0pis6m2jmodnyqaq",
+      "title": "Kod ortidagi ruh",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.024Z"
+    },
+    {
+      "id": "agcsc94o3rmodnyqax",
+      "title": "Qo'rquv mexanizmi",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.033Z"
+    },
+    {
+      "id": "jkg6ias522modnyqb6",
+      "title": "Oxirgi odam",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.040Z"
+    },
+    {
+      "id": "ljpkqw2wwismodnyqbc",
+      "title": "Kosmik yolg'izlik",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.047Z"
+    },
+    {
+      "id": "72m2stq9vbmodnyqbj",
+      "title": "Raqamli boylik",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.054Z"
+    },
+    {
+      "id": "dbgou5i0xowmodnyqbr",
+      "title": "Yo'qolgan orzular",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.062Z"
+    },
+    {
+      "id": "r10z8igy0pamodnyqbz",
+      "title": "Qadimiy kuchlar",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.072Z"
+    },
+    {
+      "id": "d8djolhp1a5modnyqc9",
+      "title": "Sirli qotillik",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.079Z"
+    },
+    {
+      "id": "sp5hgaam8imodnyqcg",
+      "title": "Haqiqat simulyatsiyasi",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.087Z"
+    },
+    {
+      "id": "kq86s6q4pjrmodnyqco",
+      "title": "Yo'qotish san'ati",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.096Z"
+    },
+    {
+      "id": "k5858vg2d8modnyqcx",
+      "title": "Algoritm hukmronligi",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.110Z"
+    },
+    {
+      "id": "ehfthyqod85modnyqdb",
+      "title": "Motivatsiya illyuziyasi",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.121Z"
+    },
+    {
+      "id": "rv52yf7v59modnyqdm",
+      "title": "Vaqt sayohatchisi kundaligi",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.134Z"
+    },
+    {
+      "id": "e86fti5qrwpmodnyqdy",
+      "title": "Yulduzlar orasida",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.146Z"
+    },
+    {
+      "id": "9ut70l2j2dnmodnyqea",
+      "title": "Risk psixologiyasi",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.160Z"
+    },
+    {
+      "id": "tj384yrfbefmodnyqep",
+      "title": "Oxirgi uchrashuv",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.172Z"
+    },
+    {
+      "id": "2u2736lwkznmodnyqf0",
+      "title": "Ajdarlar davri",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.187Z"
+    },
+    {
+      "id": "0zms8k9qysemodnyqfg",
+      "title": "Yashirin izlar",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.204Z"
+    },
+    {
+      "id": "9fblnqutjismodnyqfw",
+      "title": "Ongsiz sayohat",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.217Z"
+    },
+    {
+      "id": "m3fj2o6wl9pmodnyqg9",
+      "title": "Oddiylik kuchi",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.234Z"
+    },
+    {
+      "id": "upghhdfmuymodnyqgq",
+      "title": "Virtual haqiqat chegarasi",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.246Z"
+    },
+    {
+      "id": "pao2jhjaf7modnyqh3",
+      "title": "Xotira parchalari",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.261Z"
+    },
+    {
+      "id": "rfm3k1ahdamodnyqhi",
+      "title": "Soyalar orasida",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.278Z"
+    },
+    {
+      "id": "u8npursdtgmodnyqhz",
+      "title": "Kiber inson",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.292Z"
+    },
+    {
+      "id": "ww6dcd6id2smodnyqid",
+      "title": "Pul va ong",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.309Z"
+    },
+    {
+      "id": "e9h91e3h328modnyqiu",
+      "title": "Ko'z yoshlar ortida",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.325Z"
+    },
+    {
+      "id": "pz2o2cgmq8jmodnyqja",
+      "title": "Sirli kitob",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.344Z"
+    },
+    {
+      "id": "os1r0o7o95modnyqjt",
+      "title": "Kodlangan jinoyat",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.358Z"
+    },
+    {
+      "id": "8aqkppt9hzsmodnyqk7",
+      "title": "Vaqtsiz makon",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.375Z"
+    },
+    {
+      "id": "3fgkkweu8famodnyqkn",
+      "title": "Qarorlar zanjiri",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.394Z"
+    },
+    {
+      "id": "zomecc2d9dmodnyql7",
+      "title": "Raqamli ong",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.413Z"
+    },
+    {
+      "id": "jgms8044sbmodnyqlq",
+      "title": "O'z-o'zini sabotaj qilish",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.431Z"
+    },
+    {
+      "id": "3hjqsz0boxhmodnyqm8",
+      "title": "Yashirin kod",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.451Z"
+    },
+    {
+      "id": "qz8j4bqcpfimodnyqmr",
+      "title": "Energiya inqilobi",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.476Z"
+    },
+    {
+      "id": "29btf7ykhfgmodnyqnh",
+      "title": "Startup anatomiyasi",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.495Z"
+    },
+    {
+      "id": "gto6ao21mmmodnyqo0",
+      "title": "Unutilgan insonlar",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.514Z"
+    },
+    {
+      "id": "ow19xfj1xnnmodnyqoj",
+      "title": "Sehrgar kundaligi",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.537Z"
+    },
+    {
+      "id": "dng0osy2umodnyqp5",
+      "title": "Sohta haqiqat",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.556Z"
+    },
+    {
+      "id": "03wjgwy13oyrmodnyqpo",
+      "title": "Qayta boshlanish",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.576Z"
+    },
+    {
+      "id": "z1m09397nlqmodnyqq9",
+      "title": "Ichki tartibsizlik",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.602Z"
+    },
+    {
+      "id": "pv0g5c9rx3modnyqqy",
+      "title": "Serverdagi xotiralar",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.625Z"
+    },
+    {
+      "id": "en6u8lreb5jmodnyqrl",
+      "title": "Emotsiyalar arxitekturasi",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.654Z"
+    },
+    {
+      "id": "41ml7xcnhmimodnyqsf",
+      "title": "Tungi signal",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.686Z"
+    },
+    {
+      "id": "di0hu417namodnyqtb",
+      "title": "Yangi Yer loyihasi",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.712Z"
+    },
+    {
+      "id": "le8j20kq6zmodnyqu1",
+      "title": "Fokus kuchi",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.746Z"
+    },
+    {
+      "id": "gaisufwqoumodnyquy",
+      "title": "Yolg'izlik hikoyasi",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.769Z"
+    },
+    {
+      "id": "klu2nn4sxhmodnyqvl",
+      "title": "Parallel olamlar",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:38.788Z"
+    },
+    {
+      "id": "6ku2ju6xfajmodnyqw4",
+      "title": "Qora daftar",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:38.813Z"
+    },
+    {
+      "id": "efz417ry8inmodnyqwt",
+      "title": "Sonsiz variantlar",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:38.833Z"
+    },
+    {
+      "id": "8vn049qn5tpmodnyqxd",
+      "title": "Tafakkur chegarasi",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:38.852Z"
+    },
+    {
+      "id": "u73lr90otwlmodnyqxw",
+      "title": "Kvant tarmoq sirlari",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:38.874Z"
+    },
+    {
+      "id": "xz1sdv8vu3hmodnyqyj",
+      "title": "Ichki dialog",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:38.896Z"
+    },
+    {
+      "id": "nyjzj57vbccmodnyqz4",
+      "title": "Qorong'u tizim",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:38.922Z"
+    },
+    {
+      "id": "o7ma9i1yunhmodnyqzv",
+      "title": "Qora tuynuk siri",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:38.944Z"
+    },
+    {
+      "id": "rjsypbgfj78modnyr0g",
+      "title": "Disiplina kodi",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:38.966Z"
+    },
+    {
+      "id": "lbt4xjfjnfcmodnyr12",
+      "title": "Yashirin haqiqat",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:38.988Z"
+    },
+    {
+      "id": "0nmvplojjlzimodnyr1o",
+      "title": "Qorong'u sehr",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:39.016Z"
+    },
+    {
+      "id": "0g9wpamb9e9omodnyr2g",
+      "title": "Sirli odam",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:39.048Z"
+    },
+    {
+      "id": "bta3wrss4uimodnyr3c",
+      "title": "Ichki koinot",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:39.072Z"
+    },
+    {
+      "id": "xlvnuz31inmodnyr41",
+      "title": "O'zlikni izlash",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:39.097Z"
+    },
+    {
+      "id": "m4q611w8o7modnyr4q",
+      "title": "AI va inson chegarasi",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:39.120Z"
+    },
+    {
+      "id": "k41zkhysndmodnyr5d",
+      "title": "Stress fizikasi",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:39.153Z"
+    },
+    {
+      "id": "fbvjsjm108cmodnyr6a",
+      "title": "Parallel hayot",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:39.175Z"
+    },
+    {
+      "id": "0odz89bavksmodnyr6v",
+      "title": "Vaqt parchalanishi",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:39.197Z"
+    },
+    {
+      "id": "2qgjtf301lbmodnyr7i",
+      "title": "Muvaffaqiyat mexanizmi",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:39.219Z"
+    },
+    {
+      "id": "srqqy2b9fgkmodnyr84",
+      "title": "Oila sinovi",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:39.258Z"
+    },
+    {
+      "id": "dzx6xzvikt7modnyr96",
+      "title": "Qahramon yo'li",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:39.286Z"
+    },
+    {
+      "id": "86hz70a49emmodnyr9z",
+      "title": "Oxirgi dalil",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:39.319Z"
+    },
+    {
+      "id": "anpba8b27kcmodnyrav",
+      "title": "Kodlangan hayot",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:39.347Z"
+    },
+    {
+      "id": "2ahd1jqrjtcmodnyrbo",
+      "title": "Haqiqatning ranglari",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:39.383Z"
+    },
+    {
+      "id": "6389cb8o5immodnyrco",
+      "title": "Kodlash falsafasi",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:39.415Z"
+    },
+    {
+      "id": "e6vbfeq322modnyrdk",
+      "title": "Baxt algoritmi",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:39.453Z"
+    },
+    {
+      "id": "oin5k794vksmodnyrel",
+      "title": "Noma'lum signal",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:39.489Z"
+    },
+    {
+      "id": "23yjdwuvxnemodnyrfl",
+      "title": "Robot etikasi",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:39.527Z"
+    },
+    {
+      "id": "eyfpltwy4hwmodnyrgo",
+      "title": "Strategik fikrlash",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:39.562Z"
+    },
+    {
+      "id": "iysifmqgt3jmodnyrhn",
+      "title": "Qaror kuni",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:39.596Z"
+    },
+    {
+      "id": "3x2zf1v2xu3modnyril",
+      "title": "Yo'qolgan sehr",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:39.644Z"
+    },
+    {
+      "id": "bcrk2c1qjmhmodnyrjw",
+      "title": "Tungi tergov",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:39.682Z"
+    },
+    {
+      "id": "g2czng2chqdmodnyrky",
+      "title": "Tizimdan chiqish",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:39.722Z"
+    },
+    {
+      "id": "hlkf6eob59modnyrm2",
+      "title": "Jim savollar",
+      "category": "Falsafa",
+      "generatedAt": "2026-04-25T01:31:39.770Z"
+    },
+    {
+      "id": "1ubhcb0x9dnmodnyrnf",
+      "title": "Neural dunyo",
+      "category": "Texnologiya",
+      "generatedAt": "2026-04-25T01:31:39.814Z"
+    },
+    {
+      "id": "p1emd20r42bmodnyron",
+      "title": "Ong osti o'yinlari",
+      "category": "Psixologiya",
+      "generatedAt": "2026-04-25T01:31:39.852Z"
+    },
+    {
+      "id": "1ltuo6f0w7imodnyrpo",
+      "title": "Sirli fayl",
+      "category": "Hikoya",
+      "generatedAt": "2026-04-25T01:31:39.891Z"
+    },
+    {
+      "id": "m7cfnk4t4fomodnyrqs",
+      "title": "Galaktik signal",
+      "category": "Sci-Fi",
+      "generatedAt": "2026-04-25T01:31:39.937Z"
+    },
+    {
+      "id": "uymmqqiepamodnyrs2",
+      "title": "O'sish modeli",
+      "category": "Biznes",
+      "generatedAt": "2026-04-25T01:31:39.975Z"
+    },
+    {
+      "id": "6yd5urle6xwmodnyrt4",
+      "title": "So'nggi maktub",
+      "category": "Drama",
+      "generatedAt": "2026-04-25T01:31:40.017Z"
+    },
+    {
+      "id": "hu3op05sywmodnyru9",
+      "title": "Qadimgi urush",
+      "category": "Fantasy",
+      "generatedAt": "2026-04-25T01:31:40.063Z"
+    },
+    {
+      "id": "pdptsxbzl2modnyrvk",
+      "title": "Yo'qolgan signal",
+      "category": "Detektiv",
+      "generatedAt": "2026-04-25T01:31:40.108Z"
+    },
+    {
+      "id": "ed3fl5rceemodnyrwt",
+      "title": "Oxirgi savol",
+      "category": "Eksperimental",
+      "generatedAt": "2026-04-25T01:31:40.148Z"
+    }
+  ],
+  "lastRun": "2026-04-25T01:31:40.148Z"
+}

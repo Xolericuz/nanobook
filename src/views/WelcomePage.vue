@@ -1,7 +1,7 @@
 <template>
   <div class="welcome-page">
     <div class="hero">
-      <h1>NanoBook <span class="accent">Quantum</span></h1>
+      <h1>Xoleric <span class="accent">Library</span></h1>
       <p>Xush kelibsiz!</p>
     </div>
 

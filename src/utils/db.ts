@@ -1,14 +1,14 @@
 import Dexie, { type Table } from 'dexie'
 import type { Book, User, Settings, ReadingProgress } from '@/types'
 
-export class NanoBookDB extends Dexie {
+export class XolericDB extends Dexie {
   books!: Table<Book>
   user!: Table<User>
   settings!: Table<Settings>
   progress!: Table<ReadingProgress>
 
   constructor() {
-    super('NanoBookDB')
+    super('XolericDB')
     this.version(1).stores({
       books: 'id, title, author, category, addedAt',
       user: 'id',
@@ -18,7 +18,7 @@ export class NanoBookDB extends Dexie {
   }
 }
 
-export const db = new NanoBookDB()
+export const db = new XolericDB()
 
 export async function getAllBooks(): Promise<Book[]> {
   return db.books.toArray()
