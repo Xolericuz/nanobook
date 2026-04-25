@@ -1,4 +1,5 @@
 :root {
+  /* Dark Theme (default) */
   --bg-deep: #030306;
   --bg-panel: #0a0a0f;
   --bg-card: #111217;
@@ -13,4 +14,76 @@
   --font-size: 18px;
   --font-family: 'Inter', sans-serif;
   --brightness: 100%;
+}
+
+/* Light Theme */
+.light {
+  --bg-deep: #f5f7fa;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+
+  --text-main: #1a1a2e;
+  --text-muted: #6b7280;
+}
+
+/* Apply brightness filter */
+html {
+  filter: brightness(var(--brightness, 100%));
+}
+
+/* Base fonts */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: var(--font-size);
+  background: var(--bg-deep);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-cyan);
+  color: var(--bg-deep);
+}
+
+/* Focus */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
 }
