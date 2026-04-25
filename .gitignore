@@ -2,7 +2,12 @@ node_modules/
 dist/
 .env
 .env.local
+.env.bak
 *.log
 .DS_Store
 package-lock.json
 npm-debug.log
+
+# Generated files
+generated-books/*.json
+!.gitkeep

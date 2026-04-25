@@ -1,192 +1,191 @@
-# 🏭 Xoleric - AI-Powered Digital Publishing Factory
+# 🤖 Xoleric AI - To'liq Avtonomous AI Tizim
 
-> "AI-driven self-evolving book ecosystem" - O'zbek tilidagi birinchi raqamli nashriyot fabrikasi
+<p align="center">
+  <img src="https://img.shields.io/badge/Xoleric-AI-blue?style=for-the-badge&logo=🤖" alt="Xoleric AI">
+  <img src="https://img.shields.io/badge/4-Agents-green?style=for-the-badge" alt="4 Agents">
+  <img src="https://img.shields.io/badge/Autonomous-purple?style=for-the-badge" alt="Autonomous">
+  <img src="https://img.shields.io/badge/GitHub-Auto%20Sync-orange?style=for-the-badge" alt="GitHub Auto Sync">
+</p>
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Tezkor Boshlanish
 
+### 1. Ollama o'rnatish
 ```bash
-# Clone qiling
-git clone https://github.com/Xolericuz/nanobook.git
-cd nanobook
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull phi3:3.8b
+```
 
-# Ishga tushiring
+### 2. GitHub Token o'rnatish
+```bash
+# GitHub → Settings → Developer settings → Personal access tokens
+# Token yarating (repo, workflows)
+
+export GITHUB_TOKEN=ghp_xxxxxxx
+```
+
+### 3. AI Serverni ishga tushirish
+```bash
+cd nanobook
+npm run ai
+```
+
+### 4. Vue App
+```bash
 npm run dev
 ```
 
-Bo't-browserda: `http://localhost:5173`
+---
+
+## 📱 Arxitektura
+
+```
+┌──────────────────────────────────────────────────┐
+│                  XOLERIC AI                       │
+├──────────────────────────────────────────────────┤
+│                                                   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
+│  │  Vue App  │  │ AI Server│  │ Ollama   │      │
+│  │(Browser) │◄─►│Node.js  │◄─►│phi3:3.8b│      │
+│  └──────────┘  └────┬─────┘  └──────────┘      │
+│                     │                             │
+│              ┌──────┴──────┐                    │
+│              │ GitHub Auto  │                    │
+│              │    Sync      │                    │
+│              └──────┬──────┘                    │
+│                     │                             │
+│              ┌──────┴──────┐                    │
+│              │   GitHub    │                    │
+│              │  Repository│                    │
+│              └─────────────┘                    │
+└──────────────────────────────────────────────────┘
+```
 
 ---
 
-## 📱 Ilovani ishga tushirish
+## 🤖 4 Ta AI Agent
+
+| Agent | Vazifa | Holat |
+|-------|---------|-------|
+| 🎨 **UI Master** | UI/Design analizi va yangilash | `GET /api/agents/uiMaster/run` |
+| 📚 **Book Generator** | Kitob generatsiya | `GET /api/agents/bookGenerator/run` |
+| 🧠 **User Intelligence** | Foydalanuvchi analitika | `GET /api/agents/userIntelligence/run` |
+| 👁️ **Supervisor** | Tizim monitoring | `GET /api/agents/supervisor/run` |
+
+---
+
+## ⚡ API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Tizim holati |
+| GET | `/api/agents` | 4 agent holatlari |
+| GET | `/api/agents/:name/run` | Agent ishga tushirish |
+| GET | `/api/cycle/run` | To'liq cycle ishga tushirish |
+| GET | `/api/books` | Jami kitoblar |
+| POST | `/api/github/sync` | GitHubga push |
+
+---
+
+## 🔧 Environment Variables
 
 ```bash
-cd nanobook
-npm install
-npm run dev    # Development
-npm run build   # Production build
+# Ollama
+OLLAMA_URL=http://localhost:11434
+
+# Server Port
+PORT=3001
+
+# GitHub Auto Sync
+AUTO_SYNC=true
+SCHEDULE=1h
+
+# GitHub Token
+GITHUB_TOKEN=ghp_xxxxxxx
+GITHUB_REPO=Xolericuz/nanobook
 ```
 
 ---
 
-## 📚 100 ta kitob
-
-Xolericda **100 ta** turli kategoriyalardagi kitoblar bor:
-
-| Kategoriya | Kitoblar soni |
-|------------|---------------|
-| Falsafa | 10 |
-| Texnologiya | 10 |
-| Psixologiya | 10 |
-| Hikoya | 10 |
-| Sci-Fi | 10 |
-| Biznes | 10 |
-| Drama | 10 |
-| Fantasy | 10 |
-| Detektiv | 10 |
-| Eksperimental | 10 |
-
-Har bir kitob:
-- **5 ta bob**
-- **3800+ belgi**
-- **Unique syujet**
-
----
-
-## 🏭 AI Factory (Xoleric Factory)
-
-> "AI-driven book ecosystem" - Bu to'liq arxitektura
-
-### 4 ta Ollama Agent
-
-| Agent | Vazifa |
-|-------|-------|
-| **🤖 UIMaster** | UI/UX yangiliklar generatsiya |
-| **📚 BookGenerator** | Kuniga 1 kitob (100+ sahifa) |
-| **🧍 UserIntelligence** | Foydalanuvchi preferences |
-| **🧑‍✈️ Supervisor** | Monitoring va hisobot |
-
-### Factory ishga tushirish
+## 📦 GitHubga Upload
 
 ```bash
-cd xoleric-factory
-npm install
-node run.js start
+# .env yaratish (GITHUB_TOKEN qo'shing)
+cp .env.example .env
+
+# Edit .env
+nano .env
+
+# Server ishga tushirish
+npm run ai
 ```
 
-### API Endpoints
-
-| Endpoint | Method | Tavsif |
-|----------|--------|--------|
-| `/api/stats` | GET | Statistika |
-| `/api/generate/book` | POST | Kitob generatsiya |
-| `/api/generate/ui` | POST | UI update |
-| `/api/user/track` | POST | User tracking |
-| `/api/audit` | GET | Audit log |
-
-### Scheduler
-
-- **10:00** - Kunlik kitob generatsiya
-- **Har soat** - Tizim salomatligi tekshirish
-- **00:00** - Kunlik stats reset
+Auto-cycle GitHubga push qiladi!
 
 ---
 
-## 🔐 Blockchain-like Audit Log
+## 🎯 Foydalanish
 
-Har event immutable loglanadi - o'zgartirib bo'lmaydi:
+### Terminal
+```bash
+# Barcha agentlarni ishga tushirish
+curl http://localhost:3001/api/cycle/run
 
-```json
-{
-  "event": "BOOK_CREATED",
-  "timestamp": "2026-04-25T10:00:00Z",
-  "hash": "sha256..."
-}
+# Faqat kitob generatsiya
+curl http://localhost:3001/api/agents/bookGenerator/run
 ```
+
+### Brauzer
+- http://localhost:5173 - Vue App
+- http://localhost:3001/api/status - API holat
 
 ---
 
-## 📁 Loyiha tuzilmasi
+## 📁 Loyiha Tuzilishi
 
 ```
 nanobook/
-├── src/                    # Vue.js ilovasi
-│   ├── components/
-│   ├── views/
-│   ├── stores/
-│   └── utils/
-├── generated-books/       # 100 ta kitob
-│   └── books.json
-├── xoleric-factory/       # AI Factory
-│   ├── src/
-│   │   ├── api/          # Express server
-│   │   ├── agents/       # 4 AI agent
-│   │   ├── queue/        # BullMQ
-│   │   ├── scheduler/
-│   │   └── audit/       # Blockchain log
-│   └── run.js
-├── dist/                  # Production build
+├── server/
+│   ├── xoleric-ai.js    # Asosiy AI server
+│   ├── ai-server.js     # Oddiy AI server
+│   └── autonomous.js   # Avtonomous agent
+├── src/
+│   ├── composables/     # Vue composables
+│   ├── views/           # Sahifalar
+│   └── stores/          # State management
+├── generated-books/      # AI kitoblar
+├── .env                 # Environment
 └── package.json
 ```
 
 ---
 
-## 🛠 Texnologiyalar
-
-| Qism | Texnologiya |
-|------|------------|
-| Frontend | Vue 3 + Pinia |
-| Build | Vite |
-| Database | Dexie (IndexedDB) |
-| AI | Ollama (phi3:3.8b) |
-| Queue | BullMQ |
-| Scheduler | node-cron |
-
----
-
-## 📊 Statistika
-
-- **Jami kitoblar**: 100+
-- **Har kitob uzunligi**: 3800+ belgi
-- **Kategorilar**: 10 ta
-- **AI Factory**: 4 agent
-
----
-
-## 🔧 Development
+## 🛠 O'rnatish
 
 ```bash
-# Development
-npm run dev
+# Klonlash
+git clone https://github.com/Xolericuz/nanobook.git
+cd nanobook
 
-# Production build
-npm run build
+# Dependencies
+npm install
 
-# Preview
-npm run preview
+# Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Server ishga tushirish
+npm run ai
 ```
 
 ---
 
-## 📄 Litsenziya
+## 📄 License
 
-MIT License
-
----
-
-## 🤝 Hissa qo'shish
-
-Pull requestlar qabul qilinadi!
+MIT License - Xoleric AI Team
 
 ---
 
-## 🔗 Foydali links
-
-- [Ollama](https://ollama.ai) - Loyal AI
-- [Vue 3](https://vuejs.org)
-- [Dexie](https://dexie.org)
-
----
-
-**Xoleric** - "AI-driven book ecosystem" 🏭📚
+<p align="center">
+  <sub>Made with ❤️ by Xoleric AI</sub>
+</p>
