@@ -104,21 +104,39 @@
           <br>
           Versiya: 1.0.0
         </p>
+        <div class="setting-item">
+          <label>AI Status</label>
+          <div class="ai-status">
+            <span v-if="ollamaStatus.isOnline" class="status-online">
+              🤖 Online - {{ ollamaStatus.model }}
+            </span>
+            <span v-else class="status-offline">
+              🤖 Offline - Template mode
+            </span>
+          </div>
+        </div>
       </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useBooksStore } from '@/stores/books'
 import { useUserStore } from '@/stores/user'
+import { useOllamaBook } from '@/composables/useOllamaBook'
 
 const settingsStore = useSettingsStore()
 const booksStore = useBooksStore()
 const userStore = useUserStore()
+const { ollamaAvailable } = useOllamaBook()
+
+const ollamaStatus = computed(() => ({
+  isOnline: ollamaAvailable.value,
+  model: 'phi3:3.8b'
+}))
 
 const settings = computed(() => settingsStore.settings)
 
@@ -306,5 +324,19 @@ onMounted(() => {
   font-size: 14px;
   color: var(--text-muted);
   line-height: 1.6;
+}
+
+.ai-status {
+  margin-top: 8px;
+  
+  .status-online {
+    color: var(--accent-green);
+    font-size: 14px;
+  }
+  
+  .status-offline {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
 }
 </style>
