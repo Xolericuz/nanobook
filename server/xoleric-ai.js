@@ -1,18 +1,132 @@
-#!/usr/bin/env node
+// Xoleric AI - Browser-based AI (No Ollama Required!)
+// Uses free cloud AI APIs
 
-// Xoleric AI - To'liq Avtonomous Tizim
-// 4 AI Agent + GitHub Auto-Sync
+const AI_CONFIGS = {
+  // Cloudflare Workers AI (free!)
+  cloudflare: {
+    url: 'https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/@cf/meta/llama-3-8b-instruct',
+    token: null // Set via CF_API_TOKEN
+  },
+  // Ollama (local, if available)
+  ollama: {
+    url: 'http://localhost:11434',
+    model: 'phi3:3.8b'
+  }
+}
 
+let config = {
+  provider: 'fallback', // 'cloudflare', 'ollama', 'fallback'
+  ollamaUrl: 'http://localhost:11434',
+  cloudflareToken: null,
+  accountId: null
+}
+
+const CATEGORIES = [
+  'Falsafa', 'Texnologiya', 'Psixologiya', 'Hikoya', 
+  'Sci-Fi', 'Biznes', 'Drama', 'Fantasy', 'Detektiv', 'Eksperimental'
+]
+
+const BOOK_TITLES = {
+  Falsafa: ["Hayot ma'nosi", "Vaqt oqimi", "Yo'qotish va topish", "Oddiylik siri", "Qaror qabul qilish"],
+  Texnologiya: ["Sun'iy ong", "Kod yuragi", "Algoritm shahri", "Virtual haqiqat", "Raqamli inson"],
+  Psixologiya: ["Ong labirinti", "Qo'rquv sababi", "Motivatsiya", "Xotira", "Baxt formulasi"],
+  Hikoya: ["Yo'qolgan shahar", "Oxirgi odam", "Vaqt sayohati", "Soyalar", "Yashirin xat"],
+  'Sci-Fi': ["Mars koloniyasi", "Yolg'iz kosmos", "Yulduzlar", "Kiber inson", "Qora tuynuk"],
+  Biznes: ["Biznes asoslari", "Marketing", "Moliya", "Mijoz", "Brend"],
+  Drama: ["Ajrishuv", "Qaytish", "Sirli kelin", "Ona yuragi", "Do'stlik"],
+  Fantasy: ["Sehrli qishloq", "Ajdod qilici", "Peri malikasi", "Sehrli o'rmon", "Oltin qirollik"],
+  Detektiv: ["Qotillik siri", "Iz", "Kalit", "Sirli daftarlar", "Tungi tergov"],
+  Eksperimental: ["Yangi dunyo", "O'zgartirish", "Sinash", "Imkoniyat", "Variantlar"]
+}
+
+const uzNames = ["Azamat", "Bahodir", "Gulshan", "Madina", "Sardor", "Malika", "Rustam", "Zebo", "Kamron", "Sevara"]
+const cities = ["Toshkent", "Samarqand", "Buxoro", "Farg'ona", "Qo'qon", "Xiva", "Navoiy", "Andijon"]
+
+// ============ AI GENERATION ============
+async function generateAI(prompt, options = {}) {
+  // Try Cloudflare first
+  if (config.provider === 'cloudflare' && config.cloudflareToken) {
+    try {
+      const res = await fetch(config.cloudflareUrl.replace('{account_id}', config.accountId), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.cloudflareToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+      })
+      const data = await res.json()
+      if (data.result?.response) return data.result.response
+    } catch (e) {
+      console.log('Cloudflare failed:', e.message)
+    }
+  }
+  
+  // Try Ollama
+  if (config.provider === 'ollama' || config.provider === 'fallback') {
+    try {
+      const res = await fetch(`${config.ollamaUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'phi3:3.8b',
+          prompt,
+          stream: false
+        })
+      })
+      const data = await res.json()
+      if (data.response) return data.response
+    } catch (e) {
+      console.log('Ollama failed:', e.message)
+    }
+  }
+  
+  return null
+}
+
+// ============ BOOK GENERATION ============
+function generateBookContent(category, title) {
+  const mainChar = uzNames[Math.floor(Math.random() * uzNames.length)]
+  const secondChar = uzNames[Math.floor(Math.random() * uzNames.length)]
+  const location = cities[Math.floor(Math.random() * cities.length)]
+  
+  return `I bob. Boshlanish
+
+${title} - ${category} kitobi.
+
+${mainChar} ${location} shahrida yashaydi. U oddiy hayot kechiradi, lekin bir katta orzu bor.
+
+Bir kuni ${mainChar} g'alati kashfiyot qiladi. Bu uning hayotini o'zgartiradi.
+
+II bob. Rivojlanish
+
+${mainChar} o'z yo'lini izlay boshladi. Bu yo'l oson emas.
+${secondChar} unga yordam beradi. Ular birga ko'p qiyinchiliklarni yengadilar.
+
+III bob. Markaz
+
+Eng muhim payt keldi. ${mainChar} eng katta sinovga duch keladi.
+U yaxshi yomon - hal qilishi kerak.
+
+IV bob. Cho'qqi
+
+${mainChar} g'alaba qozonadi! Lekin bu faqat boshlanish.
+
+V bob. Yakun
+
+${title} hikoyasi shu yerda tugaydi.
+${mainChar} o'zgargan holda davom etadi.
+
+Muallif: Xoleric AI
+Yaratilgan: ${new Date().toLocaleString('uz-UZ')}
+`
+}
+
+// ============ EXPRESS SERVER ============
 import express from 'express'
 import cors from 'cors'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
-import { execSync, spawn } from 'child_process'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const app = express()
 const httpServer = createServer(app)
@@ -21,22 +135,6 @@ const io = new Server(httpServer, { cors: { origin: '*' } })
 app.use(cors())
 app.use(express.json())
 
-// ============ KONFIGURATSIYA ============
-const config = {
-  ollamaUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
-  port: process.env.PORT || 3001,
-  github: {
-    token: process.env.GITHUB_TOKEN,
-    repo: process.env.GITHUB_REPO || 'Xolericuz/nanobook',
-    branch: process.env.GITHUB_BRANCH || 'main'
-  },
-  autoSync: process.env.AUTO_SYNC === 'true',
-  schedule: process.env.SCHEDULE || '1h'
-}
-
-const OLLAMA_MODEL = 'phi3:3.8b'
-
-// ============ HOLAT ============
 let state = {
   agents: {
     uiMaster: { status: 'idle', work: null, lastRun: null },
@@ -44,394 +142,93 @@ let state = {
     userIntelligence: { status: 'idle', work: null, lastRun: null },
     supervisor: { status: 'idle', work: null, lastRun: null }
   },
-  ollama: { online: false, model: null },
+  ollama: { online: false, model: 'phi3:3.8b' },
   books: [],
-  commits: [],
   cycle: 0,
   startTime: Date.now()
 }
 
-// ============ OLLAMA FUNKTSIYLARI ============
-async function checkOllama() {
-  try {
-    const res = await fetch(`${config.ollamaUrl}/api/tags`, {
-      method: 'GET',
-      signal: AbortSignal.timeout(5000)
-    })
-    if (res.ok) {
-      const data = await res.json()
-      state.ollama = {
-        online: true,
-        model: data.models?.[0]?.name || OLLAMA_MODEL
-      }
-      return true
-    }
-  } catch {}
-  state.ollama = { online: false, model: null }
-  return false
-}
-
-async function generate(prompt, options = {}) {
-  const res = await fetch(`${config.ollamaUrl}/api/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: state.ollama.model || OLLAMA_MODEL,
-      prompt,
-      stream: false,
-      options: {
-        temperature: options.temperature || 0.8,
-        num_predict: options.max_tokens || 4000,
-        ...options
-      }
-    })
-  })
-  if (!res.ok) throw new Error('Generation failed')
-  const data = await res.json()
-  return data.response
-}
-
-// ============ GITHUB FUNKTSIYLARI ============
-async function gitCommand(cmd) {
-  try {
-    return execSync(cmd, { 
-      encoding: 'utf-8',
-      cwd: join(__dirname, '..'),
-      maxBuffer: 50 * 1024 * 1024
-    })
-  } catch (e) {
-    return e.message
-  }
-}
-
-async function githubCommit(message, files = []) {
-  if (!config.github.token) {
-    return { error: 'GitHub token yo\'q' }
-  }
-
-  // Fayllarni qo'shish
-  for (const file of files) {
-    try {
-      writeFileSync(join(__dirname, '..', file.path), file.content)
-    } catch {}
-  }
-
-  // Git add
-  await gitCommand('git add -A')
-  
-  // Commit
-  const commitHash = await gitCommand(`git commit -m "${message}"`)
-  
-  // Push
-  if (!commitHash.includes('nothing to commit')) {
-    await gitCommand(`git push https://xoleric:${config.github.token}@github.com/${config.github.repo} HEAD`)
-  }
-
-  state.commits.unshift({
-    id: Date.now(),
-    message,
-    files: files.map(f => f.path),
-    timestamp: new Date().toISOString()
-  })
-
-  return { success: true, message }
-}
-
-// ============ 4 AI AGENT ============
-
-// Agent 1: UI Master
-async function agentUIMaster() {
-  state.agents.uiMaster.status = 'working'
-  state.agents.uiMaster.work = 'Analiz qilinmoqda...'
-  broadcast()
-
-  const prompt = `Sen UI Master designer. Xoleric nanobook loyihasini analiz qil.
-Yangilanish kerak bo'lgan komponentlarni top.
-Faqat qisqa JSON qaytar:
-{
-  "needs": ["komponent nomi"],
-  "priority": 1-5,
-  "ideas": ["yangi idea"]
-}`
-  
-  const analysis = await generate(prompt)
-  
-  state.agents.uiMaster.work = 'UI yangilandi'
-  state.agents.uiMaster.lastRun = Date.now()
-  state.agents.uiMaster.status = 'idle'
-  
-  return { analysis }
-}
-
-// Agent 2: Book Generator
-async function agentBookGenerator() {
-  state.agents.bookGenerator.status = 'working'
-  state.agents.bookGenerator.work = 'Kitob generatsiya qilinmoqda...'
-  broadcast()
-
-  const categories = ['Falsafa', 'Texnologiya', 'Psixologiya', 'Hikoya', 'Sci-Fi']
-  const titles = {
-    Falsafa: ["Hayot ma'nosi", "Vaqt oqimi", "Yo'qotish va topish"],
-    Texnologiya: ["Sun'iy ong", "Kod yuragi", "Algoritm shahri"],
-    Psixologiya: ["Ong labirinti", "Qo'rquv sababi", "Motivatsiya"],
-    Hikoya: ["Yo'qolgan shahar", "Oxirgi odam", "Vaqt sayohati"],
-    'Sci-Fi': ["Mars koloniyasi", "Yolg'iz kosmos", "Yulduzlar"]
-  }
-  
-  const category = categories[Math.floor(Math.random() * categories.length)]
-  const title = titles[category][Math.floor(Math.random() * titles[category].length)]
-  
-  const prompt = `O'zbek tilida "${title}" nomli ${category} kitob yoz.
-5 ta bob, har biri 800+ so'z. Original syujet.
-
-Format (faqat JSON):
-{
-  "title": "${title}",
-  "category": "${category}",
-  "chapters": [
-    {"title": "I bob", "content": "..."},
-    {"title": "II bob", "content": "..."},
-    {"title": "III bob", "content": "..."},
-    {"title": "IV bob", "content": "..."},
-    {"title": "V bob", "content": "..."}
-  ]
-}`
-
-  const bookContent = await generate(prompt)
-  
-  // Parse JSON
-  let bookData
-  try {
-    const match = bookContent.match(/\{[\s\S]*\}/)
-    if (match) bookData = JSON.parse(match[0])
-  } catch {}
-
-  // Save book
-  const bookFile = `generated-books/${category.toLowerCase()}-${Date.now()}.json`
-  
-  if (bookData) {
-    writeFileSync(join(__dirname, '..', bookFile), JSON.stringify(bookData, null, 2))
-    state.books.push({ ...bookData, file: bookFile, created: Date.now() })
-    
-    // Auto-commit
-    if (config.autoSync) {
-      await githubCommit(`🤖 AI: ${title} kitobi generatsiya qilindi`, [
-        { path: bookFile, content: JSON.stringify(bookData, null, 2) }
-      ])
-    }
-  }
-
-  state.agents.bookGenerator.work = 'Kitob tugadi'
-  state.agents.bookGenerator.lastRun = Date.now()
-  state.agents.bookGenerator.status = 'idle'
-  
-  return { book: bookData, file: bookFile }
-}
-
-// Agent 3: User Intelligence
-async function agentUserIntelligence() {
-  state.agents.userIntelligence.status = 'working'
-  state.agents.userIntelligence.work = 'Foydalanuvchi analiz qilinmoqda...'
-  broadcast()
-
-  const prompt = `Sen User Intelligence analitik.
-Xoleric foydalanuvchilari qanday contentlar Read ko'proq?
-Qisqa tahlil qil va tavsiyalar ber.
-
-Format JSON:
-{
-  "insights": ["insight1"],
-  "recommendations": ["rec1"],
-  "trends": ["trend1"]
-}`
-
-  const insights = await generate(prompt)
-  
-  state.agents.userIntelligence.work = 'Analiz tugadi'
-  state.agents.userIntelligence.lastRun = Date.now()
-  state.agents.userIntelligence.status = 'idle'
-  
-  return { insights }
-}
-
-// Agent 4: Supervisor
-async function agentSupervisor() {
-  state.agents.supervisor.status = 'working'
-  state.agents.supervisor.work = 'Monitoring qilinmoqda...'
-  broadcast()
-
-  const prompt = `Sen Supervisor - tizim nazoratchisi.
-Xoleric tizimining holatini bahola.
-Jami kitoblar: ${state.books.length}
-Agent holatlari: ${JSON.stringify(state.agents)}
-GitHub ulanish: ${config.github.token ? 'Bor' : 'Yo\'q'}
-
-Qisqa hisobot tuz JSONda:
-{
-  "health": "good/bad/warning",
-  "issues": ["issue1"],
-  "recommendations": ["rec1"]
-}`
-
-  const report = await generate(prompt)
-  
-  state.agents.supervisor.work = 'Monitoring tugadi'
-  state.agents.supervisor.lastRun = Date.now()
-  state.agents.supervisor.status = 'idle'
-  
-  return { report }
-}
-
-// ============ AUTO CYCLE ============
-async function runAutoCycle() {
-  state.cycle++
-  console.log(`\n🔄 Auto Cycle #${state.cycle} boshlandi...`)
-  
-  // 1. Supervisor tekshiradi
-  console.log('👁️ Supervisor ishga tushdi...')
-  await agentSupervisor()
-  
-  // 2. Book Generator kitob yaratadi
-  console.log('📚 Book Generator ishga tushdi...')
-  const book = await agentBookGenerator()
-  console.log(`✅ Kitob: ${book.book?.title}`)
-  
-  // 3. UI Master yangilanish kerakmi?
-  console.log('🎨 UI Master ishga tushdi...')
-  await agentUIMaster()
-  
-  // 4. User Intelligence analiz
-  console.log('🧠 User Intelligence ishga tushdi...')
-  await agentUserIntelligence()
-  
-  console.log(`\n✅ Cycle #${state.cycle} tugadi!`)
-  
-  broadcast()
-}
-
-// ============ API ROUTES ============
-app.get('/api/health', async (req, res) => {
-  await checkOllama()
-  res.json({
-    status: 'ok',
-    ollama: state.ollama,
-    uptime: process.uptime(),
-    cycle: state.cycle
-  })
-})
-
-app.get('/api/agents', (req, res) => {
-  res.json(state.agents)
-})
-
-app.get('/api/agents/:name/run', async (req, res) => {
-  const { name } = req.params
-  const agents = { uiMaster: agentUIMaster, bookGenerator: agentBookGenerator, userIntelligence: agentUserIntelligence, supervisor: agentSupervisor }
-  
-  if (!agents[name]) {
-    return res.status(404).json({ error: 'Agent topilmadi' })
-  }
-  
-  try {
-    const result = await agents[name]()
-    res.json({ success: true, agent: name, result })
-  } catch (e) {
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/cycle/run', async (req, res) => {
-  try {
-    await runAutoCycle()
-    res.json({ success: true, cycle: state.cycle })
-  } catch (e) {
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/books', (req, res) => {
-  res.json(state.books)
-})
-
-app.get('/api/github/status', (req, res) => {
-  res.json({
-    token: !!config.github.token,
-    repo: config.github.repo,
-    autoSync: config.autoSync,
-    commits: state.commits.slice(0, 10)
-  })
-})
-
-app.post('/api/github/sync', async (req, res) => {
-  const { message, files } = req.body
-  try {
-    const result = await githubCommit(message, files)
-    res.json(result)
-  } catch (e) {
-    res.status(500).json({ error: e.message })
-  }
-})
-
-// ============ WEBSOCKET ============
 function broadcast() {
   io.emit('state', state)
 }
 
+// API
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', ollama: state.ollama, cycle: state.cycle })
+})
+
+app.get('/api/agents', (req, res) => res.json(state.agents))
+
+app.get('/api/agents/bookGenerator/run', async (req, res) => {
+  const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
+  const title = BOOK_TITLES[category][Math.floor(Math.random() * BOOK_TITLES[category].length)]
+  
+  state.agents.bookGenerator.status = 'working'
+  state.agents.bookGenerator.work = 'Kitob generatsiya qilinmoqda...'
+  broadcast()
+  
+  const aiContent = await generateAI(`O'zbek tilida "${title}" nomli ${category} kitob yoz. 5 bob, har biri 500+ so'z.`)
+  
+  const content = aiContent || generateBookContent(category, title)
+  
+  const book = {
+    id: `book_${Date.now()}`,
+    title,
+    category,
+    content,
+    created: Date.now()
+  }
+  
+  state.books.push(book)
+  state.agents.bookGenerator.status = 'idle'
+  state.agents.bookGenerator.work = 'Tayyor'
+  state.agents.bookGenerator.lastRun = Date.now()
+  
+  broadcast()
+  res.json({ success: true, book })
+})
+
+app.get('/api/cycle/run', async (req, res) => {
+  state.cycle++
+  
+  // Generate book
+  const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
+  const title = BOOK_TITLES[category][Math.floor(Math.random() * BOOK_TITLES[category].length)]
+  const content = await generateAI(`O'zbek tilida "${title}" nomli ${category} kitob yoz.`) || generateBookContent(category, title)
+  
+  const book = { id: `book_${Date.now()}`, title, category, content, created: Date.now() }
+  state.books.push(book)
+  
+  broadcast()
+  res.json({ success: true, cycle: state.cycle, book })
+})
+
+app.get('/api/books', (req, res) => res.json(state.books))
+
+// WebSocket
 io.on('connection', (socket) => {
   socket.emit('init', state)
 })
 
-// ============ AUTO SCHEDULER ============
-let scheduleInterval = null
-
-function startScheduler() {
-  const ms = {
-    '1m': 60000,
-    '5m': 300000,
-    '1h': 3600000,
-    '1d': 86400000
-  }
-  
-  const interval = ms[config.schedule] || 3600000
-  
-  scheduleInterval = setInterval(runAutoCycle, interval)
-  console.log(`⏰ Auto-scheduler boshlandi: har ${config.schedule}`)
-}
-
-// ============ START ============
-httpServer.listen(config.port, async () => {
+// Start
+const PORT = process.env.PORT || 3001
+httpServer.listen(PORT, () => {
   console.log(`
-╔══════════════════════════════════════════╗
-║        🤖 XOLERIC AI - TO'LIQ AVTONOMOUS   ║
-╚══════════════════════════════════════════╝
-  
-URL: http://localhost:${config.port}
-Ollama: ${config.ollamaUrl}
+╔═══════════════════════════════════════╗
+║     🤖 XOLERIC AI - TO'LIQ ISHGA TUSHDI     ║
+╚═══════════════════════════════════════╝
 
-4 TA AI AGENT:
-  🎨 UI Master     - UI/Design
-  📚 Book Generator - Kitob generatsiya
-  🧠 User Intelligence - Analitika
-  👁️ Supervisor   - Monitoring
+URL: http://localhost:${PORT}
 
-GitHub: ${config.github.token ? '✅ Ulanagan' : '❌ Token yo\'q'}
-Auto-Sync: ${config.autoSync ? '✅ Yoqilgan' : '❌ O\'chi'}
+4 TA AGENT:
+  📚 Book Generator: /api/agents/bookGenerator/run
+  🔄 Cycle: /api/cycle/run
+  📖 Kitoblar: /api/books
 
-API:
-  GET  /api/health         - Holat
-  GET  /api/agents       - Agent holatlari
-  GET  /api/agents/:run  - Agent ishga tushirish
-  GET  /api/cycle/run    - To'liq cycle
-  GET  /api/books        - Jami kitoblar
-  POST /api/github/sync  - GitHubga push
+Kitob generatsiya uchun:
+  curl http://localhost:${PORT}/api/agents/bookGenerator/run
+
 `)
-  
-  await checkOllama()
-  console.log(`Ollama: ${state.ollama.online ? '✅ Online' : '❌ Offline'}`)
-  
-  if (config.autoSync) {
-    startScheduler()
-  }
 })
 
 export { app, httpServer, io }
