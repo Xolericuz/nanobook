@@ -7,106 +7,228 @@
     </AppHeader>
 
     <div class="agents-content">
-      <!-- Ollama Status -->
+      <!-- System Status -->
       <section class="system-status">
         <h2>Tizim Statusi</h2>
         <div class="status-grid">
           <div class="status-card">
             <span class="label">Ollama</span>
-            <span :class="['value', ollamaOnline ? 'online' : 'offline']">
-              {{ ollamaOnline ? '✅ Online' : '❌ Offline' }}
+            <span :class="['value', systemStatus.ollamaOnline ? 'online' : 'offline']">
+              {{ systemStatus.ollamaOnline ? '✅ Online' : '❌ Offline' }}
             </span>
           </div>
           <div class="status-card">
-            <span class="label">Model</span>
-            <span class="value">{{ model }}</span>
+            <span class="label">Server</span>
+            <span :class="['value', connected ? 'online' : 'offline']">
+              {{ connected ? '✅ Online' : '❌ Offline' }}
+            </span>
           </div>
           <div class="status-card">
             <span class="label">Jami kitoblar</span>
-            <span class="value">{{ totalBooks }}</span>
+            <span class="value">{{ booksStore.books.length }}</span>
           </div>
           <div class="status-card">
-            <span class="label">Bugun generatsiya</span>
-            <span class="value">{{ generatedToday }}</span>
+            <span class="label">Agentlar</span>
+            <span class="value active">{{ getActiveAgents() }}/4</span>
           </div>
         </div>
       </section>
 
       <!-- 4 Agents -->
       <section class="agents-section">
-        <h2>AI Agentlar</h2>
+        <h2>AI Agentlar - To'liq Nazorat</h2>
         
         <div class="agents-grid">
           <!-- Agent 1: UI Master -->
-          <div class="agent-card" :class="agents.uiMaster.status">
+          <div 
+            class="agent-card" 
+            :class="{ 
+              'online': agents.uiMaster.status === 'success',
+              'running': agents.uiMaster.status === 'running',
+              'error': agents.uiMaster.status === 'error'
+            }"
+          >
             <div class="agent-icon">🎨</div>
             <div class="agent-info">
               <h3>UI Master</h3>
-              <p>Interfeys generatsiya va yangilash</p>
-              <span class="agent-status">
-                {{ agents.uiMaster.status === 'working' ? '🔄 Ishlamoqda...' : '⏸️ Tayyor' }}
+              <p>{{ agents.uiMaster.description }}</p>
+              <span class="agent-status" :class="agents.uiMaster.status">
+                {{ getStatusText(agents.uiMaster.status) }}
               </span>
+            </div>
+            <div class="agent-controls">
+              <button 
+                v-if="agents.uiMaster.status !== 'running'"
+                class="start-btn"
+                @click="startAgent('uiMaster')"
+              >
+                ▶️ Ishga tushir
+              </button>
+              <button 
+                v-if="agents.uiMaster.status === 'running'"
+                class="stop-btn"
+                @click="stopAgent('uiMaster')"
+              >
+                ⏹️ To'xtat
+              </button>
             </div>
           </div>
 
           <!-- Agent 2: Book Generator -->
-          <div class="agent-card" :class="agents.bookGenerator.status">
+          <div 
+            class="agent-card" 
+            :class="{ 
+              'online': agents.bookGenerator.status === 'success',
+              'running': agents.bookGenerator.status === 'running',
+              'error': agents.bookGenerator.status === 'error'
+            }"
+          >
             <div class="agent-icon">📚</div>
             <div class="agent-info">
               <h3>Book Generator</h3>
-              <p>Kitob generatsiya va content yozish</p>
-              <span class="agent-status">
-                {{ agents.bookGenerator.status === 'working' ? '🔄 Ishlamoqda...' : '⏸️ Tayyor' }}
+              <p>{{ agents.bookGenerator.description }}</p>
+              <span class="agent-status" :class="agents.bookGenerator.status">
+                {{ getStatusText(agents.bookGenerator.status) }}
               </span>
+            </div>
+            <div class="agent-controls">
+              <button 
+                v-if="agents.bookGenerator.status !== 'running'"
+                class="start-btn"
+                @click="startAgent('bookGenerator')"
+              >
+                ▶️ Ishga tushir
+              </button>
+              <button 
+                v-if="agents.bookGenerator.status === 'running'"
+                class="stop-btn"
+                @click="stopAgent('bookGenerator')"
+              >
+                ⏹️ To'xtat
+              </button>
             </div>
           </div>
 
           <!-- Agent 3: User Intelligence -->
-          <div class="agent-card" :class="agents.userIntelligence.status">
+          <div 
+            class="agent-card" 
+            :class="{ 
+              'online': agents.userIntelligence.status === 'success',
+              'running': agents.userIntelligence.status === 'running',
+              'error': agents.userIntelligence.status === 'error'
+            }"
+          >
             <div class="agent-icon">🧠</div>
             <div class="agent-info">
               <h3>User Intelligence</h3>
-              <p>Foydalanuvchi analitika va tavsiyalar</p>
-              <span class="agent-status">
-                {{ agents.userIntelligence.status === 'working' ? '🔄 Ishlamoqda...' : '⏸️ Tayyor' }}
+              <p>{{ agents.userIntelligence.description }}</p>
+              <span class="agent-status" :class="agents.userIntelligence.status">
+                {{ getStatusText(agents.userIntelligence.status) }}
               </span>
+            </div>
+            <div class="agent-controls">
+              <button 
+                v-if="agents.userIntelligence.status !== 'running'"
+                class="start-btn"
+                @click="startAgent('userIntelligence')"
+              >
+                ▶️ Ishga tushir
+              </button>
+              <button 
+                v-if="agents.userIntelligence.status === 'running'"
+                class="stop-btn"
+                @click="stopAgent('userIntelligence')"
+              >
+                ⏹️ To'xtat
+              </button>
             </div>
           </div>
 
           <!-- Agent 4: Supervisor -->
-          <div class="agent-card" :class="agents.supervisor.status">
+          <div 
+            class="agent-card" 
+            :class="{ 
+              'online': agents.supervisor.status === 'success',
+              'running': agents.supervisor.status === 'running',
+              'error': agents.supervisor.status === 'error'
+            }"
+          >
             <div class="agent-icon">👁️</div>
             <div class="agent-info">
               <h3>Supervisor</h3>
-              <p>Monitoring, nazorat va hisobot</p>
-              <span class="agent-status">
-                {{ agents.supervisor.status === 'working' ? '🔄 Ishlamoqda...' : '⏸️ Tayyor' }}
+              <p>{{ agents.supervisor.description }}</p>
+              <span class="agent-status" :class="agents.supervisor.status">
+                {{ getStatusText(agents.supervisor.status) }}
               </span>
             </div>
+            <div class="agent-controls">
+              <button 
+                v-if="agents.supervisor.status !== 'running'"
+                class="start-btn"
+                @click="startAgent('supervisor')"
+              >
+                ▶️ Ishga tushir
+              </button>
+              <button 
+                v-if="agents.supervisor.status === 'running'"
+                class="stop-btn"
+                @click="stopAgent('supervisor')"
+              >
+                ⏹️ To'xtat
+              </button>
+            </div>
           </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+          <AppButton 
+            variant="primary" 
+            :loading="loadingBook"
+            @click="generateBook"
+          >
+            📚 +1 Kitob Generatsiya
+          </AppButton>
+          <AppButton 
+            variant="secondary" 
+            :loading="loadingAll"
+            @click="startAllAgents"
+          >
+            🚀 Barcha Agentlarni ishga tushir
+          </AppButton>
+          <AppButton 
+            variant="danger" 
+            @click="stopAllAgents"
+          >
+            ⏹️ Barchasini to'xtat
+          </AppButton>
         </div>
       </section>
 
       <!-- Activity Log -->
       <section class="log-section">
-        <h2>Activity Log</h2>
+        <h2>Activity Log - Real-time</h2>
         <div class="log-list">
-          <div v-for="log in recentLogs" :key="log.id" class="log-item">
+          <div 
+            v-for="log in logs" 
+            :key="log.id" 
+            class="log-item"
+            :class="log.status"
+          >
             <span class="log-time">{{ formatTime(log.timestamp) }}</span>
+            <span class="log-agent">{{ log.agent }}</span>
             <span class="log-action">{{ log.action }}</span>
-            <span class="log-status" :class="log.status">{{ log.status }}</span>
+            <span class="log-status-icon">
+              {{ log.status === 'running' ? '⏳' : log.status === 'success' ? '✅' : '❌' }}
+            </span>
           </div>
-          <p v-if="recentLogs.length === 0" class="no-logs">
-            Hozircha log yo'q
+          <p v-if="logs.length === 0" class="no-logs">
+            Hozircha log yo'q - agentlarni ishga tushing!
           </p>
         </div>
-      </section>
-
-      <!-- Actions -->
-      <section class="actions-section">
-        <AppButton variant="primary" :loading="generating" @click="generateBook">
-          {{ generating ? 'Generatsiya qilinmoqda...' : '+ Kitob Generatsiya qilish' }}
-        </AppButton>
       </section>
     </div>
   </div>
@@ -114,87 +236,165 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { io, Socket } from 'socket.io-client'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppButton from '@/components/common/AppButton.vue'
-import { useOllamaBook } from '@/composables/useOllamaBook'
 import { useBooksStore } from '@/stores/books'
 
-const { checkOllama, ollamaAvailable, createBook: genBook } = useOllamaBook()
+const SERVER_URL = 'http://localhost:3001'
 const booksStore = useBooksStore()
 
-const ollamaOnline = ref(false)
-const model = ref('phi3:3.8b')
-const generating = ref(false)
-const totalBooks = ref(0)
-const generatedToday = ref(0)
+const connected = ref(false)
+const loadingBook = ref(false)
+const loadingAll = ref(false)
+let socket: Socket | null = null
 
-const agents = reactive({
-  uiMaster: { status: 'idle' as 'idle' | 'working' },
-  bookGenerator: { status: 'idle' as 'idle' | 'working' },
-  userIntelligence: { status: 'idle' as 'idle' | 'working' },
-  supervisor: { status: 'idle' as 'idle' | 'working' }
+const systemStatus = reactive({
+  ollamaOnline: false,
+  totalBooks: 0
 })
 
-const recentLogs = ref<Array<{
+const agents = reactive({
+  uiMaster: { 
+    status: 'offline', 
+    description: 'Interfeys generatsiya va yangilash' 
+  },
+  bookGenerator: { 
+    status: 'offline', 
+    description: 'Kitob generatsiya va content yozish' 
+  },
+  userIntelligence: { 
+    status: 'offline', 
+    description: 'Foydalanuvchi analitika va tavsiyalar' 
+  },
+  supervisor: { 
+    status: 'offline', 
+    description: 'Monitoring, nazorat va hisobot' 
+  }
+})
+
+const logs = ref<Array<{
   id: number
   timestamp: number
+  agent: string
   action: string
-  status: string
-}>>([
-  { id: 1, timestamp: Date.now() - 60000, action: 'Tizim ishga tushdi', status: 'success' },
-  { id: 2, timestamp: Date.now() - 120000, action: 'Ollama tekshirildi', status: 'success' },
-  { id: 3, timestamp: Date.now() - 180000, action: 'Kitoblar yuklandi', status: 'success' }
-])
+  status: 'running' | 'success' | 'error'
+}>>([])
 
 async function refreshStatus() {
-  ollamaOnline.value = await checkOllama()
-  totalBooks.value = booksStore.books.length
+  try {
+    const res = await fetch(`${SERVER_URL}/api/ollama/check`)
+    const data = await res.json()
+    systemStatus.ollamaOnline = data.online
+  } catch (e) {
+    systemStatus.ollamaOnline = false
+  }
+}
+
+async function startAgent(name: string) {
+  if (!socket?.connected) return
+  
+  socket.emit('startAgent', name)
+}
+
+async function stopAgent(name: string) {
+  if (!socket?.connected) return
+  
+  socket.emit('stopAgent', name)
 }
 
 async function generateBook() {
-  generating.value = true
-  agents.bookGenerator.status = 'working'
+  loadingBook.value = true
   
   try {
-    const book = await genBook()
-    booksStore.addNewBook(book)
-    generatedToday.value++
-    
-    recentLogs.value.unshift({
-      id: Date.now(),
-      timestamp: Date.now(),
-      action: `"${book.title}" generatsiya qilindi`,
-      status: 'success'
-    })
+    const res = await fetch(`${SERVER_URL}/api/agents/bookGenerator/start`)
+    if (res.ok) {
+      const data = await res.json()
+    }
   } catch (e) {
-    recentLogs.value.unshift({
-      id: Date.now(),
-      timestamp: Date.now(),
-      action: 'Generatsiya xatosi',
-      status: 'error'
-    })
+    console.error('Generate error:', e)
   } finally {
-    agents.bookGenerator.status = 'idle'
-    generating.value = false
+    loadingBook.value = false
   }
+}
+
+async function startAllAgents() {
+  loadingAll.value = true
+  
+  for (const agent of ['uiMaster', 'bookGenerator', 'userIntelligence', 'supervisor']) {
+    await startAgent(agent)
+    await new Promise(r => setTimeout(r, 500))
+  }
+  
+  loadingAll.value = false
+}
+
+async function stopAllAgents() {
+  for (const agent of ['uiMaster', 'bookGenerator', 'userIntelligence', 'supervisor']) {
+    await stopAgent(agent)
+    await new Promise(r => setTimeout(r, 200))
+  }
+}
+
+function getStatusText(status: string): string {
+  switch (status) {
+    case 'running': return '🔄 Ishlamoqda...'
+    case 'success': return '✅ Tayyor'
+    case 'error': return '❌ Xato'
+    default: return '⏸️ Offline'
+  }
+}
+
+function getActiveAgents(): number {
+  return Object.values(agents).filter(a => a.status === 'running' || a.status === 'success').length
 }
 
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString('uz-UZ', { 
     hour: '2-digit', 
-    minute: '2-digit' 
+    minute: '2-digit',
+    second: '2-digit'
   })
 }
 
-onMounted(() => {
-  refreshStatus()
+onMounted(async () => {
+  socket = io(SERVER_URL)
+  
+  socket.on('connect', () => {
+    connected.value = true
+    console.log('Connected to agent server')
+  })
+  
+  socket.on('disconnect', () => {
+    connected.value = false
+  })
+  
+  socket.on('init', (data: any) => {
+    if (data.agents) {
+      Object.keys(data.agents).forEach(key => {
+        agents[key as keyof typeof agents].status = data.agents[key].status
+      })
+    }
+    systemStatus.ollamaOnline = data.ollamaOnline
+    logs.value = data.logs || []
+  })
+  
+  socket.on('agentUpdate', (data: any) => {
+    if (agents[data.agent as keyof typeof agents]) {
+      agents[data.agent as keyof typeof agents].status = data.status
+    }
+  })
+  
+  socket.on('logUpdate', (newLogs: any) => {
+    logs.value = newLogs
+  })
+  
+  await refreshStatus()
+  await booksStore.loadBooks()
 })
 
 onUnmounted(() => {
-  agents.uiMaster.status = 'idle'
-  agents.bookGenerator.status = 'idle'
-  agents.userIntelligence.status = 'idle'
-  agents.supervisor.status = 'idle'
+  socket?.disconnect()
 })
 </script>
 
@@ -285,9 +485,17 @@ onUnmounted(() => {
     border: 2px solid transparent;
     transition: all 0.3s ease;
     
-    &.working {
+    &.online {
+      border-color: var(--accent-green);
+    }
+    
+    &.running {
       border-color: var(--accent-cyan);
-      animation: pulse 2s infinite;
+      animation: pulse 1.5s infinite;
+    }
+    
+    &.error {
+      border-color: var(--accent-red);
     }
     
     .agent-icon {
@@ -311,7 +519,35 @@ onUnmounted(() => {
       
       .agent-status {
         font-size: 12px;
-        color: var(--accent-cyan);
+        color: var(--text-muted);
+        
+        &.running { color: var(--accent-cyan); }
+        &.success { color: var(--accent-green); }
+        &.error { color: var(--accent-red); }
+      }
+    }
+    
+    .agent-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      
+      button {
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        border: none;
+        
+        &.start-btn {
+          background: var(--accent-green);
+          color: var(--bg-main);
+        }
+        
+        &.stop-btn {
+          background: var(--accent-red);
+          color: white;
+        }
       }
     }
   }
@@ -319,7 +555,23 @@ onUnmounted(() => {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.6; }
+}
+
+.quick-actions {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: var(--text-main);
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }
 
 .log-section {
@@ -335,53 +587,48 @@ onUnmounted(() => {
     background: var(--bg-card);
     border-radius: 12px;
     overflow: hidden;
+    max-height: 300px;
+    overflow-y: auto;
   }
   
   .log-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 8px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
     
     &:last-child {
       border-bottom: none;
     }
     
     .log-time {
-      font-size: 12px;
       color: var(--text-muted);
+      min-width: 70px;
+    }
+    
+    .log-agent {
+      color: var(--accent-cyan);
+      min-width: 100px;
     }
     
     .log-action {
       flex: 1;
-      font-size: 14px;
       color: var(--text-main);
     }
     
-    .log-status {
-      font-size: 12px;
-      
-      &.success {
-        color: var(--accent-green);
-      }
-      
-      &.error {
-        color: var(--accent-red);
-      }
-    }
+    &.running .log-status-icon { animation: blink 1s infinite; }
+  }
+  
+  @keyframes blink {
+    50% { opacity: 0.5; }
   }
   
   .no-logs {
     padding: 20px;
     text-align: center;
     color: var(--text-muted);
-    font-size: 14px;
   }
-}
-
-.actions-section {
-  display: flex;
-  justify-content: center;
 }
 </style>
