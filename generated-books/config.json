@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "description": "Xoleric AI Book Generator Configuration",
+  "ollama": {
+    "url": "http://localhost:11434/api/generate",
+    "model": "llama3.2"
+  },
+  "scheduler": {
+    "enabled": true,
+    "generateInterval": "daily",
+    "maxPerWeek": 7,
+    "maxPerMonth": 30
+  },
+  "book": {
+    "minChapterLength": 700,
+    "defaultChapters": 5,
+    "author": "Xoleric AI"
+  },
+  "categories": [
+    "Falsafa",
+    "Texnologiya",
+    "Psixologiya",
+    "Hikoya",
+    "Sci-Fi",
+    "Biznes",
+    "Drama",
+    "Fantasy",
+    "Detektiv",
+    "Eksperimental"
+  ]
+}

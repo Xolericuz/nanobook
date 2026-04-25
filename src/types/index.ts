@@ -47,6 +47,11 @@ export type Category =
   | 'Falsafa'
   | 'Biznes'
   | 'Psixologiya'
+  | 'Texnologiya'
+  | 'Hikoya'
+  | 'Sci-Fi'
+  | 'Fantasy'
+  | 'Eksperimental'
 
 export interface ReadingProgress {
   bookId: string
