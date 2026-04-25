@@ -7,22 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "agents": "node server/agents.js",
-    "factory": "cd xoleric-factory && npm install && node run.js start",
-    "factory:worker": "cd xoleric-factory && npm install && node src/queue/worker.js",
-    "factory:scheduler": "cd xoleric-factory && npm install && node src/scheduler/index.js"
+    "agents": "node server/autonomous.js"
   },
   "dependencies": {
     "dexie": "^3.2.7",
-    "express": "^5.2.1",
     "pinia": "^2.1.7",
-    "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "sass": "^1.72.0",
     "typescript": "^5.4.2",
