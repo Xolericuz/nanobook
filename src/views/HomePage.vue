@@ -4,6 +4,9 @@
       <button class="settings-btn" @click="$router.push('/settings')">
         ⚙️
       </button>
+      <button class="agents-btn" @click="$router.push('/agents')">
+        🤖
+      </button>
     </AppHeader>
 
     <!-- User Welcome -->
@@ -82,6 +85,35 @@
       </div>
     </div>
 
+    <!-- AI Generation Section -->
+    <div class="section generate-section">
+      <div class="generate-card">
+        <h3>🤖 AI Kitob Generatsiya</h3>
+        <p v-if="ollamaStatus.isOnline" class="status-online">
+          Ollama: {{ ollamaStatus.model }} --online
+        </p>
+        <p v-else class="status-offline">
+          AI generator: Foydalanishga tayyor (template)
+        </p>
+        <div class="generate-actions">
+          <AppButton 
+            variant="primary" 
+            :loading="isGenerating"
+            :disabled="isGenerating"
+            @click="generateNewBook"
+          >
+            {{ isGenerating ? 'Generatsiya...' : '+1 Kitob' }}
+          </AppButton>
+          <AppButton 
+            variant="secondary" 
+            @click="showCategoryPicker = true"
+          >
+            Kategoriya tanlang
+          </AppButton>
+        </div>
+      </div>
+    </div>
+
     <!-- Daily Quote / Feature -->
     <div class="section featured-section">
       <div class="featured-card">
@@ -93,11 +125,37 @@
         </AppButton>
       </div>
     </div>
+
+    <!-- Category Picker Modal -->
+    <Teleport to="body">
+      <div v-if="showCategoryPicker" class="category-picker" @click="showCategoryPicker = false">
+        <div class="picker-content" @click.stop>
+          <h3>Kategorya tanlang</h3>
+          <div class="category-grid">
+            <button 
+              v-for="cat in categories" 
+              :key="cat"
+              @click="selectedCategory = cat"
+            >
+              {{ cat }}
+            </button>
+          </div>
+          <div class="picker-actions">
+            <AppButton variant="primary" @click="generateNewBook">
+              Generatsiya qilish
+            </AppButton>
+            <AppButton variant="secondary" @click="showCategoryPicker = false">
+              Bekor qilish
+            </AppButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppButton from '@/components/common/AppButton.vue'
@@ -105,10 +163,32 @@ import BookCard from '@/components/books/BookCard.vue'
 import BookGrid from '@/components/books/BookGrid.vue'
 import { useBooksStore } from '@/stores/books'
 import { useUserStore } from '@/stores/user'
+import { useOllamaBook } from '@/composables/useOllamaBook'
 
 const router = useRouter()
 const booksStore = useBooksStore()
 const userStore = useUserStore()
+const { isGenerating, ollamaAvailable, checkOllama, createBook, categories } = useOllamaBook()
+
+const showCategoryPicker = ref(false)
+const selectedCategory = ref<string>('')
+
+const ollamaStatus = computed(() => ({
+  isOnline: ollamaAvailable.value,
+  model: 'phi3:3.8b'
+}))
+
+async function generateNewBook() {
+  try {
+    const category = selectedCategory.value as any || undefined
+    const book = await createBook(category)
+    booksStore.addNewBook(book)
+    selectedCategory.value = ''
+    showCategoryPicker.value = false
+  } catch (e) {
+    console.error('Failed to generate book:', e)
+  }
+}
 
 const user = computed(() => userStore.user)
 
@@ -154,6 +234,7 @@ function goToDaily() {
 onMounted(() => {
   userStore.initUser()
   booksStore.loadBooks()
+  checkOllama()
 })
 </script>
 
@@ -163,6 +244,13 @@ onMounted(() => {
 }
 
 .settings-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.agents-btn {
   background: transparent;
   border: none;
   font-size: 24px;
@@ -270,6 +358,89 @@ onMounted(() => {
       font-size: 14px;
       font-weight: 600;
       color: var(--accent-cyan);
+    }
+  }
+}
+
+.generate-section {
+  padding: 0 20px;
+  
+  .generate-card {
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 16px;
+    
+    h3 {
+      font-size: 16px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    
+    .status-online {
+      color: var(--accent-green);
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .status-offline {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .generate-actions {
+      display: flex;
+      gap: 10px;
+    }
+  }
+}
+
+.category-picker {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  
+  .picker-content {
+    background: var(--bg-card);
+    padding: 24px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 320px;
+    
+    h3 {
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+      
+      button {
+        padding: 12px;
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-main);
+        cursor: pointer;
+        
+        &:hover {
+          background: var(--accent-cyan);
+          color: var(--bg-main);
+        }
+      }
+    }
+    
+    .picker-actions {
+      display: flex;
+      gap: 10px;
     }
   }
 }
