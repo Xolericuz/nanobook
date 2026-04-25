@@ -2,7 +2,8 @@ import { ref } from 'vue'
 import type { Book, Category } from '@/types'
 import { addBook } from '@/utils/db'
 
-const OLLAMA_URL = 'http://localhost:11434'
+// AI Server URL - environment variable yoki local
+const AI_SERVER_URL = import.meta.env.VITE_AI_URL || 'http://localhost:3001'
 const MODEL = 'phi3:3.8b'
 
 const CATEGORIES: Category[] = [
@@ -84,58 +85,34 @@ export function useOllamaBook() {
 
   async function checkOllama() {
     try {
-      const res = await fetch(`${OLLAMA_URL}/api/tags`, { 
+      // Check via AI server
+      const res = await fetch(`${AI_SERVER_URL}/api/health`, { 
         method: 'GET',
         signal: AbortSignal.timeout(5000)
       })
-      ollamaAvailable.value = res.ok
-      return res.ok
+      const data = await res.json()
+      ollamaAvailable.value = data.ollama?.online || false
+      return ollamaAvailable.value
     } catch {
       ollamaAvailable.value = false
       return false
     }
   }
 
-  async function generateWithOllama(category: Category, title: string): Promise<Book> {
-    const prompt = `O'zbek tilida uz qisqa 5 ta bobdan iborat "${title}" nomli ${category} kitob yoz. 
-Har bir bob 800+ so'zdan. Original syujet va qahramonlar.
-Boshqa tilda yozma.
-
-Kitob struktura:
-{
-  "title": "${title}",
-  "category": "${category}",
-  "chapters": [
-    {"title": "I bob. Boshlanish", "content": "..."},
-    {"title": "II bob. Rivojlanish", "content": "..."},
-    {"title": "III bob. Markaz", "content": "..."},
-    {"title": "IV bob. Eng yuqori cho'qqi", "content": "..."},
-    {"title": "V bob. Yakun", "content": "..."}
-  ]
-}
-
-Faqat JSON yoz, hech qanday matn qo'shmasdan:`
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
+  async function generateWithAI(category: Category, title: string): Promise<Book> {
+    // Use AI server API
+    const res = await fetch(`${AI_SERVER_URL}/api/generate/book`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.8,
-          num_predict: 4000
-        }
-      })
+      body: JSON.stringify({ category, title })
     })
 
-    if (!response.ok) {
-      throw new Error('Ollama error')
+    if (!res.ok) {
+      throw new Error('AI server error')
     }
 
-    const data = await response.json()
-    return parseBookResponse(data.response, category, title)
+    const data = await res.json()
+    return parseBookResponse(data.raw || data.book?.content, category, title)
   }
 
   function parseBookResponse(response: string, category: string, fallbackTitle: string): Book {
@@ -231,9 +208,9 @@ Faqat JSON yoz, hech qanday matn qo'shmasdan:`
 
       if (ollamaOk) {
         try {
-          book = await generateWithOllama(cat, title)
+          book = await generateWithAI(cat, title)
         } catch (e) {
-          console.warn('Ollama failed, using fallback:', e)
+          console.warn('AI failed, using fallback:', e)
           book = generateFallbackBook(cat, title)
         }
       } else {
