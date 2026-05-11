@@ -37,7 +37,7 @@ export const useBooksStore = defineStore('books', () => {
     try {
       let stored = await getAllBooks()
       if (stored.length === 0) {
-        const defaults = getDefaultBooks()
+        const defaults = await getDefaultBooks()
         for (const book of defaults) {
           await addBook(book)
         }
