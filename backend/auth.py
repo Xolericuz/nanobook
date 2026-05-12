@@ -1,24 +1,25 @@
+import hashlib, os
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import os
 
 SECRET_KEY = os.getenv("JWT_SECRET", "ollama-server-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    salt = os.urandom(16).hex()
+    h = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}${h}"
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    salt, h = hashed.split("$", 1)
+    return hashlib.sha256((salt + plain).encode()).hexdigest() == h
 
 
 def create_token(user_id: int, username: str) -> str:

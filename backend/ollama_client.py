@@ -2,7 +2,7 @@ import httpx
 import os
 from typing import AsyncGenerator
 
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
 
 async def list_models() -> list:

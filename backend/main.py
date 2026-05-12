@@ -1,3 +1,4 @@
+import os, sys, json
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,7 +6,8 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
-import json
+
+sys.path.insert(0, os.path.dirname(__file__))
 
 from models import init_db, get_db, User, ChatHistory
 from auth import hash_password, verify_password, create_token, get_current_user
@@ -143,4 +145,4 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
