@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Chat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Login sahifasi */
+        #auth-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .auth-card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            width: 380px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+        }
+        .auth-card h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 28px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-card p.sub {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .auth-card input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .auth-card input:focus { border-color: #60a5fa; }
+        .auth-card button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .auth-card button:hover { opacity: 0.9; }
+        .auth-card .switch {
+            text-align: center;
+            margin-top: 16px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .auth-card .switch a {
+            color: #60a5fa;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .auth-card .switch a:hover { text-decoration: underline; }
+        .auth-error {
+            color: #f87171;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        /* Asosiy chat UI */
+        #app { display: none; flex-direction: column; height: 100vh; }
+
+        /* Header */
+        .header {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h2 {
+            font-size: 18px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header .user-info span { color: #94a3b8; font-size: 14px; }
+        .header .logout-btn {
+            padding: 6px 16px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: transparent;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .header .logout-btn:hover { border-color: #f87171; color: #f87171; }
+
+        /* Chat konteyneri */
+        .chat-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* Sidebar (tarix) */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h3 {
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .sidebar .history-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #94a3b8;
+            transition: background 0.2s;
+            border: none;
+            background: none;
+            text-align: left;
+            width: 100%;
+        }
+        .sidebar .history-item:hover { background: #334155; color: #e2e8f0; }
+        .sidebar .history-item small {
+            display: block;
+            font-size: 11px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        /* Asosiy chat maydoni */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+        }
+
+        /* Model tanlash */
+        .model-bar {
+            padding: 12px 24px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .model-bar label { font-size: 13px; color: #94a3b8; }
+        .model-bar select {
+            padding: 6px 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* Xabarlar */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .messages .empty {
+            text-align: center;
+            color: #475569;
+            margin-top: 80px;
+        }
+        .messages .empty h3 { font-size: 22px; margin-bottom: 8px; }
+        .messages .empty p { font-size: 14px; }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message.assistant {
+            align-self: flex-start;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-bottom-left-radius: 4px;
+        }
+        .message .label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .message.user .label { color: rgba(255,255,255,0.6); }
+
+        /* Input maydoni */
+        .input-bar {
+            padding: 16px 24px;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+        }
+        .input-bar form {
+            display: flex;
+            gap: 12px;
+        }
+        .input-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .input-bar input:focus { border-color: #60a5fa; }
+        .input-bar input:disabled { opacity: 0.5; }
+        .input-bar button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        .input-bar button:hover { opacity: 0.9; }
+        .input-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .message { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- AUTH SAHIFASI -->
+<div id="auth-page">
+    <div class="auth-card">
+        <h1>Ollama Chat</h1>
+        <p class="sub">Sun&rsquo;iy intellekt bilan suhbat</p>
+        <div class="auth-error" id="auth-error"></div>
+        <input type="text" id="auth-username" placeholder="Username" autocomplete="username">
+        <input type="password" id="auth-password" placeholder="Parol" autocomplete="current-password">
+        <button id="auth-btn" onclick="handleAuth()">Kirish</button>
+        <div class="switch">
+            <span id="auth-switch-text">Akkauntingiz yo'qmi? <a onclick="toggleAuth()">Ro'yxatdan o'tish</a></span>
+        </div>
+    </div>
+</div>
+
+<!-- ASOSIY APP -->
+<div id="app">
+    <div class="header">
+        <h2>Ollama Chat</h2>
+        <div class="user-info">
+            <span id="username-display"></span>
+            <button class="logout-btn" onclick="logout()">Chiqish</button>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="sidebar">
+            <h3>Tarix</h3>
+            <div id="history-list"></div>
+        </div>
+
+        <div class="main-chat">
+            <div class="model-bar">
+                <label>Model:</label>
+                <select id="model-select"></select>
+                <span id="model-status" style="font-size:12px;color:#64748b;"></span>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="empty">
+                    <h3>Salom!</h3>
+                    <p>Quyida modelni tanlab, suhbatni boshlang</p>
+                </div>
+            </div>
+
+            <div class="input-bar">
+                <form id="chat-form" onsubmit="sendMessage(event)">
+                    <input type="text" id="message-input" placeholder="Xabaringizni yozing..." autocomplete="off">
+                    <button type="submit" id="send-btn">Yuborish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = window.location.origin;
+    let token = localStorage.getItem('token');
+    let currentUser = null;
+    let loading = false;
+
+    // Auth holatini tekshirish
+    if (token) {
+        showApp();
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('auth-error');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    let isLogin = true;
+    function toggleAuth() {
+        isLogin = !isLogin;
+        document.getElementById('auth-btn').textContent = isLogin ? 'Kirish' : 'Ro\'yxatdan o\'tish';
+        document.getElementById('auth-switch-text').innerHTML = isLogin
+            ? 'Akkauntingiz yo\'qmi? <a onclick="toggleAuth()">Ro\'yxatdan o\'tish</a>'
+            : 'Akkauntingiz bormi? <a onclick="toggleAuth()">Kirish</a>';
+    }
+
+    async function handleAuth() {
+        const username = document.getElementById('auth-username').value.trim();
+        const password = document.getElementById('auth-password').value;
+        if (!username || !password) { showError('Barcha maydonlarni to\'ldiring'); return; }
+
+        const endpoint = isLogin ? '/api/login' : '/api/register';
+        try {
+            const res = await fetch(API + endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showError(data.detail || 'Xatolik'); return; }
+            token = data.access_token;
+            localStorage.setItem('token', token);
+            showApp();
+        } catch(e) {
+            showError('Serverga ulanishda xatolik');
+        }
+    }
+
+    function showApp() {
+        document.getElementById('auth-page').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        loadUser();
+        loadModels();
+        loadHistory();
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        token = null;
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('auth-page').style.display = 'flex';
+        document.getElementById('auth-password').value = '';
+        document.getElementById('messages').innerHTML = '';
+    }
+
+    async function loadUser() {
+        try {
+            const res = await fetch(API + '/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) { logout(); return; }
+            const data = await res.json();
+            currentUser = data;
+            document.getElementById('username-display').textContent = data.username;
+        } catch(e) { logout(); }
+    }
+
+    async function loadModels() {
+        const sel = document.getElementById('model-select');
+        const status = document.getElementById('model-status');
+        status.textContent = 'Yuklanmoqda...';
+        try {
+            const res = await fetch(API + '/api/models', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) { status.textContent = 'Model topilmadi'; return; }
+            const data = await res.json();
+            sel.innerHTML = '';
+            if (data.models.length === 0) {
+                sel.innerHTML = '<option>Model yo\'q</option>';
+                status.textContent = 'Hech qanday model topilmadi';
+                return;
+            }
+            data.models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                sel.appendChild(opt);
+            });
+            status.textContent = data.models.length + ' ta model';
+        } catch(e) {
+            status.textContent = 'Ulanish xatoligi';
+            sel.innerHTML = '<option>Xatolik</option>';
+        }
+    }
+
+    async function loadHistory() {
+        if (!token) return;
+        try {
+            const res = await fetch(API + '/api/history', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) return;
+            const data = await res.json();
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            const seen = new Set();
+            data.forEach(h => {
+                if (h.role !== 'user' || seen.has(h.content)) return;
+                seen.add(h.content);
+                const btn = document.createElement('button');
+                btn.className = 'history-item';
+                btn.innerHTML = h.content.substring(0, 50) + (h.content.length > 50 ? '...' : '') + '<small>' + h.model + '</small>';
+                list.appendChild(btn);
+            });
+        } catch(e) {}
+    }
+
+    async function sendMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('message-input');
+        const msg = input.value.trim();
+        if (!msg || loading) return;
+        input.value = '';
+
+        const model = document.getElementById('model-select').value;
+        if (!model || model === 'Model yo\'q') return;
+
+        const messagesDiv = document.getElementById('messages');
+        const empty = messagesDiv.querySelector('.empty');
+        if (empty) empty.remove();
+
+        // User xabari
+        const userDiv = document.createElement('div');
+        userDiv.className = 'message user';
+        userDiv.innerHTML = '<div class="label">Siz</div>' + escapeHtml(msg);
+        messagesDiv.appendChild(userDiv);
+
+        // Assistant xabari (stream)
+        const asstDiv = document.createElement('div');
+        asstDiv.className = 'message assistant';
+        asstDiv.innerHTML = '<div class="label">AI</div>';
+        messagesDiv.appendChild(asstDiv);
+
+        loading = true;
+        document.getElementById('send-btn').disabled = true;
+        input.disabled = true;
+
+        try {
+            const res = await fetch(API + '/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ model, message: msg, history: [] })
+            });
+
+            if (!res.ok) {
+                asstDiv.innerHTML = '<div class="label">AI</div>Xatolik yuz berdi';
+                loading = false;
+                document.getElementById('send-btn').disabled = false;
+                input.disabled = false;
+                return;
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const text = decoder.decode(value);
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.content) {
+                                fullText += data.content;
+                                asstDiv.innerHTML = '<div class="label">AI</div>' + escapeHtml(fullText);
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
+        } catch(e) {
+            asstDiv.innerHTML = '<div class="label">AI</div>Ulanish xatoligi';
+        }
+
+        loading = false;
+        document.getElementById('send-btn').disabled = false;
+        input.disabled = false;
+        loadHistory();
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+</script>
+</body>
+</html>
