@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from models import init_db, get_db, User, ChatHistory
 from auth import hash_password, verify_password, create_token, get_current_user
 from ollama_client import list_models, chat_stream, generate_stream
+from agents import AGENTS
 
 
 @asynccontextmanager
@@ -86,6 +87,39 @@ async def get_models(user=Depends(get_current_user)):
         return {"models": models}
     except Exception as e:
         raise HTTPException(503, f"Ollama bilan bog'lanib bo'lmadi: {str(e)}")
+
+
+# --- Agentlar ---
+
+@app.get("/api/agents")
+def get_agents():
+    return {"agents": [{"id": a["id"], "name": a["name"], "emoji": a["emoji"], "model": a["model"], "color": a["color"]} for a in AGENTS]}
+
+
+@app.post("/api/agent/{agent_id}/chat")
+async def agent_chat(agent_id: str, req: ChatRequest, user=Depends(get_current_user)):
+    agent = next((a for a in AGENTS if a["id"] == agent_id), None)
+    if not agent:
+        raise HTTPException(404, "Agent topilmadi")
+
+    messages = [{"role": "system", "content": agent["system_prompt"]}]
+    messages += req.history
+    messages.append({"role": "user", "content": req.message})
+
+    async def stream():
+        full = ""
+        async for chunk in chat_stream(agent["model"], messages):
+            full += chunk
+            yield f"data: {json.dumps({'content': chunk})}\n\n"
+        yield f"data: {json.dumps({'done': True})}\n\n"
+
+        if user:
+            db = next(get_db())
+            db.add(ChatHistory(user_id=user["id"], model=agent["model"], role="user", content=req.message))
+            db.add(ChatHistory(user_id=user["id"], model=agent["model"], role="assistant", content=full))
+            db.commit()
+
+    return StreamingResponse(stream(), media_type="text/event-stream")
 
 
 # --- Chat ---
