@@ -6,5 +6,5 @@ compatibility_date = "2024-04-25"
 command = "npm install && npm run build"
 cwd = "."
 
-[site]
-bucket = "./dist"
+[pages]
+output = "dist"
