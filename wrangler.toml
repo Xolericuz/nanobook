@@ -1,6 +1,5 @@
 name = "xoleric"
 compatibility_date = "2024-04-25"
-main = "dist/worker.js"
 
 [site]
 bucket = "./dist"
