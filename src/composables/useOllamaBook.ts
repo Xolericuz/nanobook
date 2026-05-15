@@ -1,254 +1,107 @@
 import { ref } from 'vue'
-import type { Book, Category } from '@/types'
-import { addBook } from '@/utils/db'
+import { useBooksStore } from '@/stores/books'
+import { generateId } from '@/utils/helpers'
 
-// AI Server URL - environment variable yoki local
-const AI_SERVER_URL = import.meta.env.VITE_AI_URL || 'http://localhost:3001'
-const MODEL = 'phi3:3.8b'
-
-const CATEGORIES: Category[] = [
-  'Falsafa', 'Texnologiya', 'Psixologiya', 'Hikoya', 
-  'Sci-Fi', 'Biznes', 'Drama', 'Fantasy', 'Detektiv', 'Eksperimental'
-]
-
-const TITLE_TEMPLATES: Record<Category, string[]> = {
-  Falsafa: [
-    "Hayot ma'nosi", "Vaqt oqimi", "Yo'qotish va topish", 
-    "Oddiylik siri", "Qaror qabul qilish", "Ichki tinchlik",
-    "Fikrlash san'ati", "O'z bilim", "Haqiqat ko'zlari", "Javobsiz savollar"
-  ],
-  Texnologiya: [
-    "Sun'iy ong", "Kod yuragi", "Algoritm shahri", 
-    "Virtual haqiqat", "Raqamli inson", "Server qal'asi",
-    "Kvant sirli", "AI va inson", "Dasturchi taqdiri", "Neural tarmoq"
-  ],
-  Psixologiya: [
-    "Ong labirinti", "Qo'rquv sababi", "Motivatsiya yo'qolishi",
-    "Xotira yo'qotishi", "O'z-o'zini aldamchi", "Emotsiya rangi",
-    "Ichki gaplar", "Stress tanasi", "Baxt formulasi", "Ong osti dunyosi"
-  ],
-  Hikoya: [
-    "Yo'qolgan shahar", "Oxirgi odam", "Vaqt sayohati",
-    "Soyalar sarguzasht", "Yashirin xat", "Tungi ovoz",
-    "Qorong'u noma'lum", "Parallel taqdir", "Noma'lum signal", "Sirli hujjat"
-  ],
-  'Sci-Fi': [
-    "Mars koloniyasi", "Yolg'iz kosmos", "Yulduzlar chorak",
-    "Kiber inson yaratish", "Energiya inqilobi", "Yangi yer",
-    "Qora tuynuk siri", "Vaqt bukurishi", "Robot axloqi", "Galaktik aloqa"
-  ],
-  Biznes: [
-    "Biznes asoslari", "Marketing siri", "Moliyaviy sog'lomlik",
-    "Mijoz sokinligi", "Brend qurish", "Savdo san'ati",
-    "Rahbarlik qoidalari", "O'sish strategiyasi", "Krizadan chiqish", "Jamoa qurish"
-  ],
-  Drama: [
-    "Ajrlishuv", "Qaytish", "Sirli kelin",
-    "Ona yuragi", "Ota va farzand", "Oilaviy sirlar",
-    "Do'stlik sinovi", "Ishq azobi", "Haqiqat va yolg'on", "Kutilmagan oxir"
-  ],
-  Fantasy: [
-    "Sehrli qishloq", "Ajdod qilici", "Peri malikasi",
-    "G'ayritabiiy", "Sehrli o'rmon", "Arvohlar shahri",
-    "Oltin qirollik", "Tungum qirollik", "Ajina shoir", "Sehrli kitob"
-  ],
-  Detektiv: [
-    "Qotillik siri", "Iz", "Kalit",
-    "Sirli daftarlar", "Tungi tergov", "Soxta iz",
-    "Kodlangan xat", "Oxirgi guvoh", "Qurbon", "Sirli shaxs"
-  ],
-  Eksperimental: [
-    "Yangi dunyo", "O'zgartirish", "Sinash",
-    "Imkoniyat", "Variantlar", "Tanlov",
-    "Qayta boshlash", "Yangidan", "Cheksiz", "Noma'lum"
-  ]
-}
-
-const uzNames = [
-  "Azamat", "Bahodir", "Gulshan", "Madina", "Sardor", "Malika",
-  "Rustam", "Zebo", "Kamron", "Sevara", "Davron", "Nargiz",
-  "Otabek", "Sarvar", "Hilola", "Jasur", "Gulnora", "Farrux"
-]
-
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-function generateBookId(): string {
-  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
-}
+const AI_URL = import.meta.env.VITE_AI_URL || 'http://localhost:3001'
 
 export function useOllamaBook() {
+  const booksStore = useBooksStore()
   const isGenerating = ref(false)
   const error = ref<string | null>(null)
-  const ollamaAvailable = ref(false)
 
-  async function checkOllama() {
+  const categories = [
+    { name: 'Falsafa', titles: ['Sukunat ichidagi haqiqat', 'Vaqt bilan suhbat', 'Yo\'qotish san\'ati', 'Oddiylik kuchi', 'Qarorlar zanjiri', 'Ichki tartibsizlik', 'Tafakkur chegarasi', 'O\'zlikni izlash'] },
+    { name: 'Texnologiya', titles: ['Sun\'iy ong uyg\'onishi', 'Kod ortidagi ruh', 'Algoritm hukmronligi', 'Virtual haqiqat', 'Raqamli ong', 'Kvant tarmoq', 'Neural dunyo'] },
+    { name: 'Psixologiya', titles: ['Ong labirinti', 'Qo\'rquv mexanizmi', 'Xotira parchalari', 'Ichki dialog', 'Stress fizikasi', 'Baxt algoritmi'] },
+    { name: 'Sci-Fi', titles: ['Marsdagi uyg\'onish', 'Kosmik yolg\'izlik', 'Yulduzlar orasida', 'Kiber inson', 'Yangi Yer', 'Qora tuynuk siri'] },
+    { name: 'Biznes', titles: ['0 dan start', 'Raqamli boylik', 'Startup anatomiyasi', 'Fokus kuchi', 'Strategik fikrlash'] },
+    { name: 'Drama', titles: ['Yo\'qolgan orzular', 'Oxirgi uchrashuv', 'Yolg\'izlik hikoyasi', 'Oila sinovi', 'So\'nggi maktub'] },
+    { name: 'Fantasy', titles: ['Sehrli shahar', 'Ajdarlar davri', 'Sehrgar kundaligi', 'Parallel olamlar', 'Qadimgi urush'] },
+    { name: 'Detektiv', titles: ['Izsiz yo\'qolish', 'Sirli qotillik', 'Yashirin izlar', 'Qora daftar', 'Tungi tergov'] },
+    { name: 'Eksperimental', titles: ['Tush ichidagi tush', 'Haqiqat simulyatsiyasi', 'Vaqtsiz makon', 'Sonsiz variantlar', 'Tizimdan chiqish'] },
+    { name: 'Hikoya', titles: ['Yo\'qolgan shahar', 'Oxirgi odam', 'Soyalar orasida', 'Noma\'lum signal'] },
+  ]
+
+  const names = ['Bahrom', 'Malika', 'Ravshan', 'Zulxumor', 'Temur', 'Yulduz', 'Shavkat', 'Ziyoda', 'Akmal', 'Sevara', 'Jahongir', 'Gulnora', 'Bobur', 'Nilufar', 'Sanjar', 'Lobar', 'Rustam', 'Madina', 'Jasur', 'Dilnoza']
+
+  const settings = ['Samarqand', 'Buxoro', 'Toshkent', 'Xiva', 'Farg\'ona', 'Navoiy', 'Andijon', 'Nukus', 'Shahrisabz', 'Termiz']
+
+  async function checkOllama(): Promise<boolean> {
     try {
-      // Check via AI server
-      const res = await fetch(`${AI_SERVER_URL}/api/health`, { 
-        method: 'GET',
-        signal: AbortSignal.timeout(5000)
-      })
-      const data = await res.json()
-      ollamaAvailable.value = data.ollama?.online || false
-      return ollamaAvailable.value
+      const res = await fetch(`${AI_URL}/api/health`)
+      return res.ok
     } catch {
-      ollamaAvailable.value = false
       return false
     }
   }
 
-  async function generateWithAI(category: Category, title: string): Promise<Book> {
-    // Use AI server API
-    const res = await fetch(`${AI_SERVER_URL}/api/generate/book`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, title })
-    })
-
-    if (!res.ok) {
-      throw new Error('AI server error')
-    }
-
-    const data = await res.json()
-    return parseBookResponse(data.raw || data.book?.content, category, title)
+  function randomPick<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)]
   }
 
-  function parseBookResponse(response: string, category: string, fallbackTitle: string): Book {
-    let bookData: Partial<Book>
-    
-    try {
-      const match = response.match(/\{[\s\S]*\}/)
-      if (match) {
-        bookData = JSON.parse(match[0])
-      } else {
-        throw new Error('No JSON')
-      }
-    } catch {
-      return generateFallbackBook(category as Category, fallbackTitle)
-    }
-
-    const bookId = generateBookId()
-    const totalContent = bookData.chapters?.map((c: any) => c.content).join('\n\n') || ''
-    
-    return {
-      id: bookId,
-      title: bookData.title || fallbackTitle,
-      author: 'Xoleric AI',
-      category: category as Category,
-      description: `${bookData.title || fallbackTitle} - ${category} janridagi kitob`,
-      cover: '',
-      content: totalContent,
-      chapters: (bookData.chapters || []).map((ch: any, i: number) => ({
-        id: `${bookId}-${i + 1}`,
-        title: ch.title || `Bob ${i + 1}`,
-        pages: [ch.content?.substring(0, 2000) || '']
-      })),
-      progress: 0,
-      lastRead: 0,
-      isFavorite: false,
-      addedAt: Date.now(),
-      totalPages: bookData.chapters?.length || 5
-    }
-  }
-
-  function generateFallbackBook(category: Category, title: string): Book {
-    const bookId = generateBookId()
-    const mainChar = randomElement(uzNames)
-    const secondChar = randomElement(uzNames)
-    const location = randomElement([
-      "Toshkent", "Samarqand", "Buxoro", "Farg'ona", "Qo'qon", 
-      "Xiva", "Navoiy", "Andijon", "Namangan", "Qarshi"
-    ])
-
-    const chapterTemplates = [
-      `I bob. Boshlanish\n\n${title} kitobi shu yerdan boshlanadi.\n\n${mainChar} ${location} shahrida yashaydi. U oddiy hayot kechiraydi, lekin bir orzu bor - u ${title.toLowerCase()} haqida bilmoqchi.\n\nBir kuni ${mainChar} g'alatiga duch keladi. Bu uchrashuv uning hayotini o'zgartiradi.`,
-      
-      `II bob. Rivojlanish\n\n${mainChar} o'z yo'lini izlay boshladi. Bu yo'l oson emas. Ko'p sinovlar bor.\n\n${secondChar} unga yordam beradi. Ular birga ishlaydilar.\n\nHar bir kashfiyot - yangi qadam.`,
-      
-      `III bob. Markaz\n\nEng muhim payt keldi. ${mainChar} o'ziga duch keladi - bu eng katta sinov.\n\nU yaxshi yo yomon - hal qilishi kerak.\n\nBu paytda ${secondChar} ham muhim rol o'ynaydi.`,
-      
-      `IV bob. Eng yuqori cho'qqi\n\n${mainChar} eng katta to'siqqa duch keladi. Bu to'siqni yengish uchun uning qo'rida kuch kerak.\n\nVa nihoyat - g'alaba! Lekin bu faqat boshlanish.`,
-      
-      `V bob. Yakun\n\n${title} hikoyasi shu yerda tugaydi, lekin ${mainChar}ning hikoyasi davom etadi.\n\nU o'zgargan. Endi u boshqacha qaraydi.\n\nMana shu, ${title}.`
+  function generateChapter(index: number, bookTitle: string, cat: string, chars: string[], setting: string): string {
+    const a = chars[0], b = chars[1], c = chars[2]
+    const templates = [
+      `${a} ${setting}da yashar edi. ${bookTitle} uning butun hayotini o'zgartirib yubordi. ${b} bilan uchrashish, ${c} bilan suhbatlashish — bularning barchasi tasodif emas edi. Har bir uchrashuv, har bir so'z ma'noga ega edi. ${a} o'z yo'lini topish uchun uzoq izlandi. Oxirida tushundi: haqiqat oddiy narsalarda yashirin.`,
+      `${b} ${a}ga qaradi: "Sen ${bookTitle}ni tushunishing kerak". ${a} bosh chayqadi. ${c} esa indamay kuzatib turardi. ${setting} ko'chalarida kezib, ular hayotning mazmuni haqida bahslashdilar. ${a} asta-sekin ${bookTitle}ning mohiyatini anglay boshladi. Bu oddiy tushuncha edi, lekin uni topish uchun butun bir umr kerak bo'lishi mumkin edi.`,
+      `${bookTitle} — bu shunchaki so'z emas edi. Bu ${a}ning hayot falsafasiga aylandi. ${b} va ${c} uning yo'ldoshlari edi. ${setting}ning go'zal manzaralari ularga ilhom berdi. Har bir kun yangi kashfiyot, har bir kecha yangi o'ylar bilan o'tdi. ${a} endi biladi: eng muhim narsa — bu izlashdan to'xtamaslik.`,
     ]
-
-    return {
-      id: bookId,
-      title,
-      author: 'Xoleric AI',
-      category,
-      description: `${title} - ${category} janridagi ajoyib hikoya`,
-      cover: '',
-      content: chapterTemplates.join('\n\n\n'),
-      chapters: chapterTemplates.map((content, i) => ({
-        id: `${bookId}-${i + 1}`,
-        title: chapterTemplates[i].split('\n')[0],
-        pages: [content]
-      })),
-      progress: 0,
-      lastRead: 0,
-      isFavorite: false,
-      addedAt: Date.now(),
-      totalPages: 5
-    }
+    return templates[index % templates.length]
   }
 
-  async function createBook(category?: Category): Promise<Book> {
+  async function createBook(category?: string): Promise<void> {
     isGenerating.value = true
     error.value = null
 
     try {
-      const cat = category || randomElement(CATEGORIES)
-      const title = randomElement(TITLE_TEMPLATES[cat])
-      const ollamaOk = await checkOllama()
+      const cat = category || randomPick(categories).name
+      const catData = categories.find(c => c.name === cat) || categories[0]
+      const title = randomPick(catData.titles)
+      const chars = [randomPick(names), randomPick(names), randomPick(names)]
+      const setting = randomPick(settings)
+      const chapters = []
 
-      let book: Book
-
-      if (ollamaOk) {
-        try {
-          book = await generateWithAI(cat, title)
-        } catch (e) {
-          console.warn('AI failed, using fallback:', e)
-          book = generateFallbackBook(cat, title)
-        }
-      } else {
-        book = generateFallbackBook(cat, title)
+      for (let i = 0; i < 5; i++) {
+        const content = generateChapter(i, title, cat, chars, setting)
+        chapters.push({
+          id: `${generateId()}-${i + 1}`,
+          title: `${i + 1}-bob`,
+          pages: [content],
+        })
       }
 
-      await addBook(book)
-      return book
+      const fullText = chapters.map(ch => ch.pages[0]).join('\n\n')
+
+      const book = {
+        id: generateId(),
+        title,
+        author: 'Xoleric AI',
+        category: cat,
+        description: `"${title}" — ${cat} janridagi kitob. ${setting}da kechuvchi hikoya.`,
+        cover: '',
+        content: fullText,
+        chapters,
+        progress: 0,
+        lastRead: 0,
+        isFavorite: false,
+        addedAt: Date.now(),
+        totalPages: chapters.length,
+      }
+
+      const { addBook } = await import('@/utils/db')
+      await addBook(book as any)
+      await booksStore.loadBooks()
     } catch (e: any) {
-      error.value = e.message
-      throw e
+      error.value = e.message || 'Xatolik yuz berdi'
     } finally {
       isGenerating.value = false
     }
   }
 
-  async function createBooks(count: number, category?: Category): Promise<Book[]> {
-    const books: Book[] = []
-    
-    for (let i = 0; i < count; i++) {
-      const book = await createBook(category)
-      books.push(book)
-      
-      if (i < count - 1) {
-        await new Promise(r => setTimeout(r, 500))
-      }
-    }
-
-    return books
-  }
-
   return {
     isGenerating,
     error,
-    ollamaAvailable,
     checkOllama,
     createBook,
-    createBooks,
-    categories: CATEGORIES
   }
 }

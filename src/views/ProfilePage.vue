@@ -1,114 +1,180 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useBooksStore } from '@/stores/books'
+
+const router = useRouter()
+const userStore = useUserStore()
+const booksStore = useBooksStore()
+
+const stats = computed(() => userStore.readingStats)
+const totalBooks = computed(() => booksStore.books.length)
+const completedBooks = computed(() => booksStore.books.filter(b => b.progress >= 100).length)
+
+function formatTime(minutes: number): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m} daqiqa`
+  return `${h} soat ${m} daqiqa`
+}
+
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+</script>
+
 <template>
-  <div class="profile-page">
-    <AppHeader title="Profil" />
+  <div class="profile">
+    <header class="page-header">
+      <h1 class="page-title">Profil</h1>
+    </header>
 
-    <div v-if="user" class="profile-content">
-      <div class="avatar">{{ user.username[0].toUpperCase() }}</div>
-      <h2>{{ user.username }}</h2>
-      <p class="code">Kod: {{ user.code }}</p>
-
-      <div class="stats">
-        <div class="stat">
-          <span class="value">{{ user.booksRead }}</span>
-          <span class="label">Kitob o'qilgan</span>
-        </div>
-        <div class="stat">
-          <span class="value">{{ formatTime(user.totalReadingTime) }}</span>
-          <span class="label">Jami vaqt</span>
-        </div>
+    <div class="profile-card">
+      <div class="profile-avatar">
+        {{ userStore.displayName.charAt(0).toUpperCase() }}
       </div>
+      <h2 class="profile-name">{{ userStore.displayName }}</h2>
+      <p class="profile-code">ID: {{ userStore.userCode }}</p>
+      <p v-if="userStore.user?.createdAt" class="profile-date">
+        Ro'yxatdan o'tgan: {{ formatDate(userStore.user.createdAt) }}
+      </p>
+    </div>
 
-      <div class="actions">
-        <AppButton variant="secondary" @click="showEdit = true">O'zgartirish</AppButton>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">{{ stats.booksRead }}</div>
+        <div class="stat-label">O'qilgan kitoblar</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ totalBooks }}</div>
+        <div class="stat-label">Jami kitoblar</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ completedBooks }}</div>
+        <div class="stat-label">Tugatilgan</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ stats.streak }}</div>
+        <div class="stat-label">Kunlik streak</div>
       </div>
     </div>
 
-    <div v-else class="no-user">
-      <p>Foydalanuvchi topilmadi</p>
-      <AppButton @click="$router.push('/welcome')">Ro'yxatdan o'tish</AppButton>
+    <div class="section">
+      <h3 class="section-title">O'qish statistikasi</h3>
+      <div class="reading-stat">
+        <span>Umumiy o'qish vaqti</span>
+        <span class="stat-value">{{ formatTime(stats.totalTime) }}</span>
+      </div>
+      <div class="reading-stat">
+        <span>O'rtacha kitob/oy</span>
+        <span class="stat-value">{{ Math.max(1, Math.round(stats.booksRead / 1)) }}</span>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppButton from '@/components/common/AppButton.vue'
-import { useUserStore } from '@/stores/user'
-import { formatReadingTime } from '@/utils/helpers'
-
-const userStore = useUserStore()
-const user = ref(userStore.user)
-const showEdit = ref(false)
-
-function formatTime(seconds: number): string {
-  return formatReadingTime(seconds)
+<style scoped>
+.profile {
+  max-width: 600px;
 }
-</script>
 
-<style scoped lang="scss">
-.profile-page {
-  padding-bottom: 100px;
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 1.5rem; font-weight: 700; }
 
-  .profile-content {
-    padding: 40px 20px;
-    text-align: center;
+.profile-card {
+  text-align: center;
+  padding: 32px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+}
 
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent-gold), var(--accent-cyan));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: 700;
-      color: #000;
-      margin: 0 auto 16px;
-    }
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 auto 16px;
+}
 
-    h2 {
-      font-size: 24px;
-      color: var(--text-main);
-      margin-bottom: 8px;
-    }
+.profile-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
 
-    .code {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 32px;
-    }
+.profile-code {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
 
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-bottom: 32px;
+.profile-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
 
-      .stat {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
 
-        .value {
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--accent-gold);
-        }
+.stat-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+}
 
-        .label {
-          font-size: 12px;
-          color: var(--text-muted);
-        }
-      }
-    }
-  }
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
 
-  .no-user {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-  }
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.reading-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.reading-stat:last-child { border-bottom: none; }
+
+.reading-stat .stat-value {
+  font-weight: 500;
+  color: var(--accent);
 }
 </style>

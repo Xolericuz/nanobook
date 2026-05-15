@@ -1,106 +1,79 @@
-<template>
-  <div class="book-reader">
-    <div class="reader-content" :style="{ fontSize: settings.fontSize + 'px' }">
-      <p>{{ currentPage }}</p>
-    </div>
-    <div class="reader-nav">
-      <button :disabled="!hasPrev" @click="$emit('prev')">←</button>
-      <span class="page-info">{{ chapterIndex + 1 }}/{{ totalChapters }} - {{ pageIndex + 1 }}/{{ totalPages }}</span>
-      <button :disabled="!hasNext" @click="$emit('next')">→</button>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Book } from '@/types'
 
 const props = defineProps<{
-  book: Book
+  chapter: { title: string; pages: string[] } | null
   chapterIndex: number
   pageIndex: number
-  settings: { fontSize: number; brightness: number; theme: string; fontFamily: string }
+  totalChapters: number
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   prev: []
   next: []
 }>()
 
-const currentPage = computed(() => {
-  if (!props.book.chapters[props.chapterIndex]) return ''
-  return props.book.chapters[props.chapterIndex].pages[props.pageIndex] || ''
-})
-
-const totalChapters = computed(() => props.book.chapters.length)
-const totalPages = computed(() => props.book.chapters[props.chapterIndex]?.pages.length || 0)
-
-const hasPrev = computed(() => {
-  if (props.chapterIndex > 0) return true
-  if (props.chapterIndex === 0 && props.pageIndex > 0) return true
-  return false
-})
-
+const hasPrev = computed(() => props.chapterIndex > 0 || props.pageIndex > 0)
 const hasNext = computed(() => {
-  if (props.chapterIndex < props.book.chapters.length - 1) return true
-  if (props.chapterIndex === props.book.chapters.length - 1 && props.pageIndex < (props.book.chapters[props.chapterIndex]?.pages.length || 0) - 1) return true
-  return false
+  if (!props.chapter) return false
+  return props.chapterIndex < props.totalChapters - 1 || props.pageIndex < props.chapter.pages.length - 1
 })
 </script>
 
-<style scoped lang="scss">
-.book-reader {
+<template>
+  <div class="reader-component">
+    <div v-if="chapter" class="reader-page">
+      <h2 class="chapter-title">{{ chapter.title }}</h2>
+      <div class="page-content">
+        {{ chapter.pages[pageIndex] }}
+      </div>
+    </div>
+    <div class="reader-nav">
+      <button class="btn btn-ghost" :disabled="!hasPrev" @click="emit('prev')">←</button>
+      <span class="nav-info">
+        {{ chapterIndex + 1 }}/{{ totalChapters }} — {{ pageIndex + 1 }}/{{ chapter?.pages.length || 1 }}
+      </span>
+      <button class="btn btn-ghost" :disabled="!hasNext" @click="emit('next')">→</button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.reader-component {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-deep);
+}
 
-  .reader-content {
-    flex: 1;
-    padding: 24px;
-    color: var(--text-main);
-    line-height: 1.8;
-    overflow-y: auto;
+.reader-page {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  line-height: 1.8;
+}
 
-    p {
-      white-space: pre-wrap;
-    }
-  }
+.chapter-title {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--accent);
+}
 
-  .reader-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 24px;
-    background: var(--bg-panel);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+.page-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
 
-    button {
-      background: var(--bg-card);
-      border: none;
-      border-radius: 12px;
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.2s ease;
+.reader-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 40px;
+  border-top: 1px solid var(--border);
+}
 
-      &:hover:not(:disabled) {
-        background: var(--accent-cyan);
-        color: #000;
-      }
-
-      &:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-      }
-    }
-
-    .page-info {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-  }
+.nav-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 </style>

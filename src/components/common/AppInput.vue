@@ -1,76 +1,78 @@
-<template>
-  <div class="app-input" :class="{ focused, error }">
-    <label v-if="label">{{ label }}</label>
-    <input
-      :type="type"
-      :value="modelValue"
-      :placeholder="placeholder"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      @focus="focused = true"
-      @blur="focused = false"
-    />
-    <span v-if="error" class="error-msg">{{ error }}</span>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue'
-
-defineProps<{
+withDefaults(defineProps<{
   modelValue: string
   label?: string
   placeholder?: string
   type?: string
   error?: string
-}>()
+}>(), {
+  type: 'text',
+  placeholder: '',
+})
 
-defineEmits<{
+const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
-
-const focused = ref(false)
 </script>
 
-<style scoped lang="scss">
-.app-input {
+<template>
+  <div class="input-wrapper">
+    <label v-if="label" class="input-label">{{ label }}</label>
+    <input
+      :value="modelValue"
+      :type="type"
+      :placeholder="placeholder"
+      :class="['input-field', { 'input-error': error }]"
+      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+    />
+    <p v-if="error" class="error-text">{{ error }}</p>
+  </div>
+</template>
+
+<style scoped>
+.input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
 
-  label {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+.input-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
 
-  input {
-    background: var(--bg-card);
-    border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 14px 16px;
-    color: var(--text-main);
-    font-size: 16px;
-    transition: all 0.2s ease;
+.input-field {
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  font-family: inherit;
+}
 
-    &:focus {
-      outline: none;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
-    }
-  }
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+}
 
-  &.focused input {
-    border-color: var(--accent-cyan);
-  }
+.input-field.input-error {
+  border-color: var(--error);
+}
 
-  &.error input {
-    border-color: #ff4444;
-  }
+.input-field.input-error:focus {
+  box-shadow: 0 0 0 3px var(--error-muted);
+}
 
-  .error-msg {
-    font-size: 12px;
-    color: #ff4444;
-  }
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.error-text {
+  font-size: 0.78rem;
+  color: var(--error);
 }
 </style>

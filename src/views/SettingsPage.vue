@@ -1,171 +1,15 @@
-<template>
-  <div class="settings-page">
-    <AppHeader title="Sozlamalar" />
-
-    <div class="settings-content">
-      <!-- Ko'rinish Settings -->
-      <section class="settings-section">
-        <h2>Ko'rinish</h2>
-        
-        <div class="setting-item">
-          <label>Rejim</label>
-          <div class="toggle-group">
-            <button 
-              :class="{ active: settings.theme === 'dark' }"
-              @click="setTheme('dark')"
-            >
-              Qorong'ilik
-            </button>
-            <button 
-              :class="{ active: settings.theme === 'light' }"
-              @click="setTheme('light')"
-            >
-              Yorug'lik
-            </button>
-          </div>
-        </div>
-
-        <div class="setting-item">
-          <label>Shrift o'lchami: {{ settings.fontSize }}px</label>
-          <input 
-            type="range" 
-            min="14" 
-            max="24" 
-            :value="settings.fontSize"
-            @input="setFontSize(Number(($event.target as HTMLInputElement).value))"
-          />
-          <div class="preview-text" :style="{ fontSize: settings.fontSize + 'px' }">
-            Namuna matni
-          </div>
-        </div>
-
-        <div class="setting-item">
-          <label>Yorqinlik: {{ settings.brightness }}%</label>
-          <input 
-            type="range" 
-            min="50" 
-            max="150" 
-            :value="settings.brightness"
-            @input="setBrightness(Number(($event.target as HTMLInputElement).value))"
-          />
-        </div>
-      </section>
-
-      <!-- Kitob Settings -->
-      <section class="settings-section">
-        <h2>Kitoblar</h2>
-        
-        <div class="setting-item">
-          <label>Standart ko'rinish</label>
-          <select v-model="settings.fontFamily">
-            <option value="Inter">Inter</option>
-            <option value="Roboto">Roboto</option>
-            <option value="Open Sans">Open Sans</option>
-            <option value="Merriweather">Merriweather</option>
-          </select>
-        </div>
-
-        <div class="setting-item">
-          <button class="btn-secondary" @click="exportBooks">
-            Kitoblarni eksport qilish
-          </button>
-        </div>
-      </section>
-
-      <!-- Statistika -->
-      <section class="settings-section">
-        <h2>Statistika</h2>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.totalBooks }}</span>
-            <span class="stat-label">Jami kitoblar</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.completedBooks }}</span>
-            <span class="stat-label">O'qilgan</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.favorites }}</span>
-            <span class="stat-label">Sevimli</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ readingTimeFormatted }}</span>
-            <span class="stat-label">O'qish vaqti</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- About -->
-      <section class="settings-section">
-        <h2>Ilova haqida</h2>
-        <p class="about-text">
-          Xoleric - AI yordamida kitob generatsiya qiluvchi zamonaviy Kutubxona.
-          <br>
-          Versiya: 1.0.0
-        </p>
-        <div class="setting-item">
-          <label>AI Status</label>
-          <div class="ai-status">
-            <span v-if="ollamaStatus.isOnline" class="status-online">
-              🤖 Online - {{ ollamaStatus.model }}
-            </span>
-            <span v-else class="status-offline">
-              🤖 Offline - Template mode
-            </span>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
+import { ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useBooksStore } from '@/stores/books'
-import { useUserStore } from '@/stores/user'
-import { useOllamaBook } from '@/composables/useOllamaBook'
 
 const settingsStore = useSettingsStore()
 const booksStore = useBooksStore()
-const userStore = useUserStore()
-const { ollamaAvailable } = useOllamaBook()
 
-const ollamaStatus = computed(() => ({
-  isOnline: ollamaAvailable.value,
-  model: 'phi3:3.8b'
-}))
+const fonts = ['Inter', 'Roboto', 'Open Sans', 'Merriweather', 'Georgia', 'JetBrains Mono']
+const showExportSuccess = ref(false)
 
-const settings = computed(() => settingsStore.settings)
-
-const stats = computed(() => ({
-  totalBooks: booksStore.books.length,
-  completedBooks: booksStore.books.filter(b => b.progress >= 100).length,
-  favorites: booksStore.favorites.length
-}))
-
-const readingTimeFormatted = computed(() => {
-  const mins = Math.floor((userStore.user?.totalReadingTime || 0) / 60)
-  if (mins < 60) return `${mins}daq`
-  const hours = Math.floor(mins / 60)
-  return `${hours}soat ${mins % 60}daq`
-})
-
-function setTheme(theme: 'dark' | 'light') {
-  settingsStore.setTheme(theme)
-}
-
-function setFontSize(size: number) {
-  settingsStore.setFontSize(size)
-}
-
-function setBrightness(value: number) {
-  settingsStore.setBrightness(value)
-}
-
-function exportBooks() {
+function exportData() {
   const data = JSON.stringify(booksStore.books, null, 2)
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -173,170 +17,271 @@ function exportBooks() {
   a.href = url
   a.download = 'xoleric-books.json'
   a.click()
+  URL.revokeObjectURL(url)
+  showExportSuccess.value = true
+  setTimeout(() => { showExportSuccess.value = false }, 2000)
 }
-
-onMounted(() => {
-  settingsStore.loadSettings()
-  booksStore.loadBooks()
-  userStore.initUser()
-})
 </script>
 
-<style scoped lang="scss">
-.settings-page {
-  padding-bottom: 100px;
+<template>
+  <div class="settings">
+    <header class="page-header">
+      <h1 class="page-title">Sozlamalar</h1>
+    </header>
+
+    <section class="section">
+      <h3 class="section-title">Tashqi ko'rinish</h3>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>Mavzu</span>
+          <span class="setting-desc">{{ settingsStore.prefs.theme === 'dark' ? 'Qorong\'i' : 'Yorug\'' }}</span>
+        </div>
+        <button
+          class="theme-toggle"
+          :class="{ dark: settingsStore.prefs.theme === 'dark' }"
+          @click="settingsStore.setTheme(settingsStore.prefs.theme === 'dark' ? 'light' : 'dark')"
+        >
+          <span class="toggle-thumb" />
+        </button>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>Shrift o'lchami</span>
+          <span class="setting-desc">{{ settingsStore.prefs.fontSize }}px</span>
+        </div>
+        <input
+          type="range"
+          min="12"
+          max="32"
+          :value="settingsStore.prefs.fontSize"
+          @input="settingsStore.setFontSize(Number(($event.target as HTMLInputElement).value))"
+          class="range-slider"
+        />
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>Yorqinlik</span>
+          <span class="setting-desc">{{ settingsStore.prefs.brightness }}%</span>
+        </div>
+        <input
+          type="range"
+          min="30"
+          max="150"
+          :value="settingsStore.prefs.brightness"
+          @input="settingsStore.setBrightness(Number(($event.target as HTMLInputElement).value))"
+          class="range-slider"
+        />
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>O'qish rejimi</span>
+          <span class="setting-desc">{{ settingsStore.prefs.readingMode === 'scroll' ? 'Skroll' : 'Sahifali' }}</span>
+        </div>
+        <select
+          :value="settingsStore.prefs.readingMode"
+          @change="settingsStore.setReadingMode(($event.target as HTMLSelectElement).value as any)"
+          class="setting-select"
+        >
+          <option value="paged">Sahifali</option>
+          <option value="scroll">Skroll</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title">Matn sozlamalari</h3>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>Shrift turi</span>
+        </div>
+        <select
+          :value="settingsStore.prefs.fontFamily"
+          @change="settingsStore.setFontFamily(($event.target as HTMLSelectElement).value)"
+          class="setting-select"
+        >
+          <option v-for="f in fonts" :key="f" :value="f">{{ f }}</option>
+        </select>
+      </div>
+
+      <div class="preview-box" :style="{ fontFamily: settingsStore.prefs.fontFamily, fontSize: settingsStore.prefs.fontSize + 'px' }">
+        <p>Bu matn shrift o'zgarishini ko'rsatish uchun namuna. Siz o'qish paytida qulay shrift va o'lchamni tanlashingiz mumkin.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title">Ma'lumotlar</h3>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>Kitoblarni eksport qilish</span>
+          <span class="setting-desc">JSON formatida</span>
+        </div>
+        <button class="btn btn-outline btn-sm" @click="exportData">
+          {{ showExportSuccess ? '✓ Eksport qilindi' : 'Eksport' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title">Ilova haqida</h3>
+
+      <div class="about-info">
+        <div class="about-row">
+          <span>Versiya</span>
+          <span>2.0.0</span>
+        </div>
+        <div class="about-row">
+          <span>Platforma</span>
+          <span>Web</span>
+        </div>
+        <div class="about-row">
+          <span>Kitoblar</span>
+          <span>{{ booksStore.books.length }} ta</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<style scoped>
+.settings {
+  max-width: 600px;
 }
 
-.settings-content {
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 1.5rem; font-weight: 700; }
+
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 20px;
+  margin-bottom: 16px;
 }
 
-.settings-section {
-  margin-bottom: 32px;
-  
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
 }
 
 .setting-item {
-  margin-bottom: 20px;
-  
-  label {
-    display: block;
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-
-  input[type="range"] {
-    width: 100%;
-    height: 4px;
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-    outline: none;
-    
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      background: var(--accent-cyan);
-      border-radius: 50%;
-      cursor: pointer;
-    }
-  }
-
-  select {
-    width: 100%;
-    padding: 12px;
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-main);
-    font-size: 16px;
-  }
-}
-
-.toggle-group {
   display: flex;
-  gap: 8px;
-  
-  button {
-    flex: 1;
-    padding: 12px;
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    
-    &.active {
-      background: var(--accent-cyan);
-      color: var(--bg-main);
-      border-color: var(--accent-cyan);
-    }
-    
-    &:hover:not(.active) {
-      border-color: var(--accent-cyan);
-    }
-  }
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
 }
 
-.preview-text {
+.setting-item:last-child { border-bottom: none; }
+
+.setting-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.setting-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.theme-toggle {
+  width: 48px;
+  height: 26px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle.dark {
+  background: var(--accent);
+}
+
+.toggle-thumb {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform var(--transition-fast);
+}
+
+.theme-toggle.dark .toggle-thumb {
+  transform: translateX(22px);
+}
+
+.range-slider {
+  width: 140px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--bg-hover);
+  border-radius: 3px;
+  outline: none;
+  border: none;
+  padding: 0;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.setting-select {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.preview-box {
   margin-top: 12px;
   padding: 16px;
-  background: var(--bg-card);
-  border-radius: 8px;
-  color: var(--text-main);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+.preview-box p { margin: 0; }
+
+.about-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.stat-card {
-  padding: 16px;
-  background: var(--bg-card);
-  border-radius: 12px;
-  text-align: center;
-  
-  .stat-value {
-    display: block;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--accent-cyan);
-    margin-bottom: 4px;
-  }
-  
-  .stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
+.about-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
-.btn-secondary {
-  padding: 12px 20px;
-  background: transparent;
-  border: 1px solid var(--accent-cyan);
-  border-radius: 8px;
-  color: var(--accent-cyan);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: var(--accent-cyan);
-    color: var(--bg-main);
-  }
-}
-
-.about-text {
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.ai-status {
-  margin-top: 8px;
-  
-  .status-online {
-    color: var(--accent-green);
-    font-size: 14px;
-  }
-  
-  .status-offline {
-    color: var(--text-muted);
-    font-size: 14px;
-  }
+.about-row span:last-child {
+  color: var(--text-primary);
+  font-weight: 500;
 }
 </style>

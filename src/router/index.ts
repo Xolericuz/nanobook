@@ -1,44 +1,44 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/HomePage.vue')
+      component: () => import('@/views/HomePage.vue'),
     },
     {
       path: '/library',
       name: 'library',
-      component: () => import('@/views/LibraryPage.vue')
+      component: () => import('@/views/LibraryPage.vue'),
     },
     {
       path: '/reader/:id',
       name: 'reader',
-      component: () => import('@/views/ReaderPage.vue')
+      component: () => import('@/views/ReaderPage.vue'),
     },
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('@/views/ProfilePage.vue')
+      component: () => import('@/views/ProfilePage.vue'),
     },
     {
       path: '/settings',
       name: 'settings',
-      component: () => import('@/views/SettingsPage.vue')
+      component: () => import('@/views/SettingsPage.vue'),
     },
     {
       path: '/welcome',
       name: 'welcome',
-      component: () => import('@/views/WelcomePage.vue')
+      component: () => import('@/views/WelcomePage.vue'),
     },
     {
       path: '/agents',
       name: 'agents',
-      component: () => import('@/views/AgentsPage.vue')
-    }
-  ]
+      component: () => import('@/views/AgentsPage.vue'),
+    },
+  ],
 })
 
 export default router

@@ -1,7 +1,5 @@
-import type { Book, Category } from '@/types'
-
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
 }
 
 export function generateCode(): string {
@@ -13,63 +11,72 @@ export function generateCode(): string {
   return code
 }
 
-export function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString('uz-UZ')
+export function formatDate(date: Date | number): string {
+  const d = date instanceof Date ? date : new Date(date)
+  return d.toLocaleDateString('uz-UZ', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 }
 
-export function formatReadingTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
-  if (hours > 0) return `${hours}soat ${mins}daq`
-  return `${mins}daq`
+export function formatReadingTime(minutes: number): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m} daqiqa`
+  if (m === 0) return `${h} soat`
+  return `${h} soat ${m} daqiqa`
 }
 
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength) + '...'
+export function truncateText(text: string, max: number = 100): string {
+  if (text.length <= max) return text
+  return text.slice(0, max).trimEnd() + '...'
 }
 
-export async function getDefaultBooks(): Promise<Book[]> {
-  const response = await fetch('/books.json')
-  if (!response.ok) {
-    throw new Error(`Failed to load books: ${response.status}`)
-  }
-  return response.json()
+export function estimateReadingTime(text: string): number {
+  const words = text.split(/\s+/).length
+  return Math.max(1, Math.ceil(words / 200))
 }
 
-export const categories: Category[] = [
-  'Barcha',
-  'Roman',
-  'Drama',
-  'Detektiv',
-  'Fantastika',
-  'Tarix',
-  'Falsafa',
-  'Biznes',
-  'Psixologiya',
-  'Texnologiya',
-  'Hikoya',
-  'SciFi',
-  'Fantasy',
-  'Eksperimental'
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+}
+
+export function pluralize(count: number, word: string): string {
+  return count === 1 ? word : `${word}lar`
+}
+
+export const categories = [
+  { id: 'Barcha', label: 'Barcha', icon: '📚' },
+  { id: 'Roman', label: 'Roman', icon: '📖' },
+  { id: "She'r", label: "She'r", icon: '🎭' },
+  { id: 'Drama', label: 'Drama', icon: '🎪' },
+  { id: 'Detektiv', label: 'Detektiv', icon: '🔍' },
+  { id: 'Fantastika', label: 'Fantastika', icon: '🚀' },
+  { id: 'Tarix', label: 'Tarix', icon: '📜' },
+  { id: 'Falsafa', label: 'Falsafa', icon: '💭' },
+  { id: 'Biznes', label: 'Biznes', icon: '💼' },
+  { id: 'Psixologiya', label: 'Psixologiya', icon: '🧠' },
+  { id: 'Texnologiya', label: 'Texnologiya', icon: '💻' },
+  { id: 'Hikoya', label: 'Hikoya', icon: '📝' },
+  { id: 'Sci-Fi', label: 'Sci-Fi', icon: '🛸' },
+  { id: 'Fantasy', label: 'Fantasy', icon: '🐉' },
+  { id: 'Eksperimental', label: 'Eksperimental', icon: '🔬' },
+  { id: 'Triller', label: 'Triller', icon: '😱' },
+  { id: 'Sarguzasht', label: 'Sarguzasht', icon: '🗺️' },
 ]
 
-export function getCategoryLabel(category: Category): string {
-  const labels: Record<Category, string> = {
-    'Barcha': 'Barcha',
-    'Roman': 'Roman',
-    'Drama': 'Drama',
-    'Detektiv': 'Detektiv',
-    'Fantastika': 'Fantastika',
-    'Tarix': 'Tarix',
-    'Falsafa': 'Falsafa',
-    'Biznes': 'Biznes',
-    'Psixologiya': 'Psixologiya',
-    'Texnologiya': 'Texnologiya',
-    'Hikoya': 'Hikoya',
-    'SciFi': 'Sci-Fi',
-    'Fantasy': 'Fantasy',
-    'Eksperimental': 'Eksperimental'
+export function getCategoryLabel(cat: string): string {
+  const found = categories.find(c => c.id === cat)
+  return found?.label || cat
+}
+
+export async function getDefaultBooks(): Promise<any[]> {
+  try {
+    const res = await fetch('/books.json')
+    const data = await res.json()
+    return Array.isArray(data) ? data : data.books || []
+  } catch {
+    return []
   }
-  return labels[category] || category
 }

@@ -1,52 +1,25 @@
-<template>
-  <div class="welcome-page">
-    <div class="hero">
-      <h1>Xoleric <span class="accent">Library</span></h1>
-      <p>Xush kelibsiz!</p>
-    </div>
-
-    <form class="login-form" @submit.prevent="handleSubmit">
-      <AppInput v-model="username" label="Ism" placeholder="Ismingizni kiriting" />
-      <AppInput v-model="code" label="Kod (ixtiyoriy)" placeholder="Maxsus kod..." />
-
-      <p v-if="error" class="error">{{ error }}</p>
-
-      <AppButton :loading="isLoading" size="lg">Davom etish</AppButton>
-    </form>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import AppInput from '@/components/common/AppInput.vue'
-import AppButton from '@/components/common/AppButton.vue'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
-
-const username = ref('')
-const code = ref('')
-const error = ref('')
+const name = ref('')
 const isLoading = ref(false)
+const error = ref('')
 
-async function handleSubmit() {
-  if (!username.value.trim()) {
+async function start() {
+  if (!name.value.trim()) {
     error.value = 'Iltimos, ismingizni kiriting'
     return
   }
-
   isLoading.value = true
   error.value = ''
-
   try {
-    const userCode = await userStore.createUser(username.value.trim(), code.value.trim() || undefined)
-    if (code.value.trim()) {
-      alert(`Sizning maxsus kodingiz: ${userCode}`)
-    }
+    await userStore.createUser(name.value.trim())
     router.push('/')
-  } catch (e) {
+  } catch {
     error.value = 'Xatolik yuz berdi'
   } finally {
     isLoading.value = false
@@ -54,49 +27,100 @@ async function handleSubmit() {
 }
 </script>
 
-<style scoped lang="scss">
-.welcome-page {
-  min-height: 100vh;
+<template>
+  <div class="welcome">
+    <div class="welcome-card">
+      <div class="welcome-logo">X</div>
+      <h1 class="welcome-title">Xoleric Library</h1>
+      <p class="welcome-desc">
+        O'zbek tilidagi elektron kitoblar kutubxonasiga xush kelibsiz.
+        O'qing, o'rganing va kashf eting.
+      </p>
+
+      <form @submit.prevent="start" class="welcome-form">
+        <div class="input-group">
+          <label>Ismingiz</label>
+          <input
+            v-model="name"
+            placeholder="Ismingizni kiriting..."
+            maxlength="30"
+            autofocus
+          />
+        </div>
+        <p v-if="error" class="error-text">{{ error }}</p>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" :disabled="isLoading">
+          <span v-if="isLoading" class="spinner" />
+          <span v-else>Boshlash</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.welcome {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 20px;
+  min-height: 80vh;
+}
 
-  .hero {
-    text-align: center;
-    margin-bottom: 40px;
+.welcome-card {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  padding: 48px 32px;
+}
 
-    h1 {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 8px;
+.welcome-logo {
+  width: 72px;
+  height: 72px;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 auto 24px;
+}
 
-      .accent {
-        background: linear-gradient(135deg, var(--accent-gold), var(--accent-cyan));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-    }
+.welcome-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
 
-    p {
-      color: var(--text-muted);
-    }
-  }
+.welcome-desc {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
 
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 400px;
-    margin: 0 auto;
-    width: 100%;
+.welcome-form {
+  text-align: left;
+}
 
-    .error {
-      color: #ff4444;
-      font-size: 14px;
-      text-align: center;
-    }
-  }
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.input-group input {
+  width: 100%;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
 }
 </style>

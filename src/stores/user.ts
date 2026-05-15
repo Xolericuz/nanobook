@@ -1,54 +1,77 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { User } from '@/types'
-import { getUser, saveUser as dbSaveUser } from '@/utils/db'
-import { generateCode } from '@/utils/helpers'
+import { ref, computed } from 'vue'
+import type { User, UserPreferences } from '@/types'
+import { authApi } from '@/api/auth'
+import { getUser, saveUser } from '@/utils/db'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
   const isAuthenticated = ref(false)
 
+  const displayName = computed(() => user.value?.username || 'Mehmon')
+  const userCode = computed(() => user.value?.code || '---')
+  const readingStats = computed(() => ({
+    booksRead: user.value?.booksRead || 0,
+    totalTime: user.value?.totalReadingTime || 0,
+    streak: user.value?.readingStreak || 0,
+  }))
+
   async function initUser() {
-    const stored = await getUser()
-    if (stored) {
-      user.value = stored
+    const existing = await getUser()
+    if (existing) {
+      user.value = existing as User
       isAuthenticated.value = true
+      return existing
     }
+    return null
   }
 
-  async function createUser(username: string, code?: string) {
+  async function createUser(username: string, email?: string) {
+    const code = generateCode()
     const newUser: User = {
-      id: '1',
+      id: generateId(),
       username,
-      code: code || generateCode(),
+      email: email || '',
+      code,
+      avatar: '',
       createdAt: Date.now(),
       booksRead: 0,
-      totalReadingTime: 0
+      totalReadingTime: 0,
+      readingStreak: 0,
+      lastReadDate: '',
+      preferences: {
+        fontSize: 18,
+        brightness: 100,
+        theme: 'dark',
+        fontFamily: 'Inter',
+        readingMode: 'paged',
+        autoSync: false,
+      },
     }
-    await dbSaveUser(newUser)
     user.value = newUser
     isAuthenticated.value = true
-    return newUser.code
+    await saveUser(newUser as any)
+    return newUser
   }
 
-  async function updateUsername(newName: string) {
-    if (user.value) {
-      user.value.username = newName
-      await dbSaveUser(user.value)
-    }
+  async function updateProfile(data: Partial<User>) {
+    if (!user.value) return
+    Object.assign(user.value, data)
+    await saveUser(user.value as any)
+    authApi.updateProfile(data).catch(() => {})
   }
 
-  async function incrementBooksRead() {
+  function incrementBooksRead() {
     if (user.value) {
       user.value.booksRead++
-      await dbSaveUser(user.value)
+      updateProfile({ booksRead: user.value.booksRead })
     }
   }
 
-  async function addReadingTime(seconds: number) {
+  function addReadingTime(minutes: number) {
     if (user.value) {
-      user.value.totalReadingTime += seconds
-      await dbSaveUser(user.value)
+      user.value.totalReadingTime += minutes
+      updateProfile({ totalReadingTime: user.value.totalReadingTime })
     }
   }
 
@@ -58,13 +81,21 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
-    user,
-    isAuthenticated,
-    initUser,
-    createUser,
-    updateUsername,
-    incrementBooksRead,
-    addReadingTime,
-    logout
+    user, isAuthenticated, displayName, userCode, readingStats,
+    initUser, createUser, updateProfile,
+    incrementBooksRead, addReadingTime, logout,
   }
 })
+
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
+}
+
+function generateCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}

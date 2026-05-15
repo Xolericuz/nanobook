@@ -1,88 +1,122 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { Book } from '@/types'
+import { generateId } from '@/utils/helpers'
+
+const emit = defineEmits<{
+  add: [book: Book]
+  close: []
+}>()
+
+const title = ref('')
+const author = ref('')
+const category = ref('Roman')
+const description = ref('')
+
+const categories = ['Roman', 'She\'r', 'Drama', 'Detektiv', 'Fantastika', 'Tarix', 'Falsafa', 'Biznes', 'Psixologiya', 'Texnologiya', 'Hikoya', 'Sci-Fi', 'Fantasy', 'Eksperimental']
+
+function submit() {
+  if (!title.value.trim()) return
+  const book: Book = {
+    id: generateId(),
+    title: title.value.trim(),
+    author: author.value.trim() || 'Noma\'lum',
+    category: category.value,
+    description: description.value.trim(),
+    cover: '',
+    content: '',
+    chapters: [],
+    progress: 0,
+    lastRead: 0,
+    isFavorite: false,
+    addedAt: Date.now(),
+    totalPages: 0,
+  }
+  emit('add', book)
+}
+</script>
+
 <template>
-  <div v-if="show" class="add-book-modal" @click.self="$emit('close')">
-    <div class="modal-content">
-      <h2>Kitob Qo'shish</h2>
-      <form @submit.prevent="$emit('add', book)">
-        <AppInput v-model="book.title" label="Nom" placeholder="Kitob nomi" />
-        <AppInput v-model="book.author" label="Muallif" placeholder="Muallif ismi" />
-        <AppInput v-model="book.category" label="Kategoriya" placeholder="Roman, She'r..." />
-        <AppInput v-model="book.description" label="Tavsif" placeholder="Kitob haqida" />
-        <div class="actions">
-          <AppButton variant="ghost" @click="$emit('close')">Bekor</AppButton>
-          <AppButton type="submit">Qo'shish</AppButton>
+  <div class="modal-overlay" @click.self="emit('close')">
+    <div class="modal">
+      <h2>Yangi kitob qo'shish</h2>
+      <form @submit.prevent="submit" class="modal-form">
+        <div class="field">
+          <label>Kitob nomi</label>
+          <input v-model="title" placeholder="Nomini kiriting" required />
+        </div>
+        <div class="field">
+          <label>Muallif</label>
+          <input v-model="author" placeholder="Muallif ismi" />
+        </div>
+        <div class="field">
+          <label>Kategoriya</label>
+          <select v-model="category">
+            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tavsif</label>
+          <textarea v-model="description" placeholder="Qisqa tavsif" rows="3" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" @click="emit('close')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary">Qo'shish</button>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive } from 'vue'
-import type { Book } from '@/types'
-import AppInput from '@/components/common/AppInput.vue'
-import AppButton from '@/components/common/AppButton.vue'
-
-defineProps<{
-  show: boolean
-}>()
-
-defineEmits<{
-  close: []
-  add: [book: Book]
-}>()
-
-const book = reactive<Book>({
-  id: '',
-  title: '',
-  author: '',
-  category: '',
-  description: '',
-  cover: '',
-  content: '',
-  chapters: [],
-  progress: 0,
-  lastRead: 0,
-  isFavorite: false,
-  addedAt: Date.now(),
-  totalPages: 0
-})
-</script>
-
-<style scoped lang="scss">
-.add-book-modal {
+<style scoped>
+.modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 300;
+}
 
-  .modal-content {
-    background: var(--bg-panel);
-    border-radius: 20px;
-    padding: 24px;
-    width: 90%;
-    max-width: 400px;
-    border: 1px solid var(--accent-cyan);
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 440px;
+  max-width: 90vw;
+}
 
-    h2 {
-      color: var(--text-main);
-      margin-bottom: 20px;
-    }
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+.field {
+  margin-bottom: 14px;
+}
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
-  }
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
 }
 </style>

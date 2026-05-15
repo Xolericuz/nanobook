@@ -1,24 +1,19 @@
-import { ref, onMounted } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 
 export function useTheme() {
-  const settingsStore = useSettingsStore()
-  const isDark = ref(true)
-
-  onMounted(() => {
-    isDark.value = settingsStore.settings.theme === 'dark'
-  })
+  const settings = useSettingsStore()
 
   function toggleTheme() {
-    const newTheme = isDark.value ? 'light' : 'dark'
-    settingsStore.setTheme(newTheme)
-    isDark.value = newTheme === 'dark'
+    settings.setTheme(settings.prefs.theme === 'dark' ? 'light' : 'dark')
   }
 
-  function setDark(dark: boolean) {
-    settingsStore.setTheme(dark ? 'dark' : 'light')
-    isDark.value = dark
+  function setDark() {
+    settings.setTheme('dark')
   }
 
-  return { isDark, toggleTheme, setDark }
+  return {
+    isDark: () => settings.prefs.theme === 'dark',
+    toggleTheme,
+    setDark,
+  }
 }

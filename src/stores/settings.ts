@@ -1,55 +1,71 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { Settings } from '@/types'
+import { ref, watch } from 'vue'
+import type { UserPreferences } from '@/types'
 import { getSettings, saveSettings } from '@/utils/db'
 
 export const useSettingsStore = defineStore('settings', () => {
-  const settings = ref<Settings>({
+  const prefs = ref<UserPreferences>({
     fontSize: 18,
     brightness: 100,
     theme: 'dark',
-    fontFamily: 'Inter'
+    fontFamily: 'Inter',
+    readingMode: 'paged',
+    autoSync: false,
   })
 
+  watch(() => prefs.value.theme, (val) => {
+    document.documentElement.classList.toggle('light', val === 'light')
+  }, { immediate: true })
+
+  watch(() => prefs.value.fontSize, () => applyCss())
+  watch(() => prefs.value.brightness, () => applyCss())
+  watch(() => prefs.value.fontFamily, () => applyCss())
+
+  function applyCss() {
+    const root = document.documentElement
+    root.style.setProperty('--reader-font-size', `${prefs.value.fontSize}px`)
+    root.style.setProperty('--reader-brightness', `${prefs.value.brightness}%`)
+    root.style.setProperty('--reader-font-family', prefs.value.fontFamily)
+  }
+
   async function loadSettings() {
-    const stored = await getSettings()
-    if (stored) {
-      settings.value = stored
-      applySettings()
+    const saved = await getSettings()
+    if (saved) {
+      Object.assign(prefs.value, saved)
+      applyCss()
     }
   }
 
-  async function updateSettings(newSettings: Partial<Settings>) {
-    settings.value = { ...settings.value, ...newSettings }
-    await saveSettings(settings.value)
-    applySettings()
+  async function updateSettings(data: Partial<UserPreferences>) {
+    Object.assign(prefs.value, data)
+    await saveSettings(prefs.value as any)
+    applyCss()
   }
 
-  function applySettings() {
-    const root = document.documentElement
-    root.style.setProperty('--font-size', `${settings.value.fontSize}px`)
-    root.style.setProperty('--brightness', `${settings.value.brightness}%`)
-    root.style.setProperty('--font-family', settings.value.fontFamily)
+  function setFontSize(size: number) {
+    updateSettings({ fontSize: Math.max(12, Math.min(32, size)) })
   }
 
-  async function setFontSize(size: number) {
-    await updateSettings({ fontSize: size })
+  function setBrightness(val: number) {
+    updateSettings({ brightness: Math.max(30, Math.min(150, val)) })
   }
 
-  async function setBrightness(value: number) {
-    await updateSettings({ brightness: value })
+  function setTheme(theme: 'dark' | 'light') {
+    updateSettings({ theme })
   }
 
-  async function setTheme(theme: 'dark' | 'light') {
-    await updateSettings({ theme })
+  function setFontFamily(font: string) {
+    updateSettings({ fontFamily: font })
+  }
+
+  function setReadingMode(mode: 'scroll' | 'paged') {
+    updateSettings({ readingMode: mode })
   }
 
   return {
-    settings,
-    loadSettings,
-    updateSettings,
-    setFontSize,
-    setBrightness,
-    setTheme
+    prefs,
+    loadSettings, updateSettings,
+    setFontSize, setBrightness, setTheme,
+    setFontFamily, setReadingMode,
   }
 })

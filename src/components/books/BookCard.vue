@@ -1,135 +1,132 @@
+<script setup lang="ts">
+import type { Book } from '@/types'
+
+const props = defineProps<{
+  book: Book
+}>()
+
+const emit = defineEmits<{
+  click: [id: string]
+  favorite: [id: string]
+}>()
+
+const colors = ['#7c5cfc', '#f5b342', '#34d399', '#60a5fa', '#f87171', '#a78bfa', '#f472b6', '#38bdf8']
+
+function getInitials(title: string): string {
+  return title.charAt(0).toUpperCase()
+}
+
+function getCoverColor(title: string): string {
+  return colors[title.length % colors.length]
+}
+</script>
+
 <template>
-  <div class="book-card" @click="$emit('click')">
-    <div class="cover">
-      <div v-if="!book.cover" class="placeholder">{{ book.title[0] }}</div>
-      <img v-else :src="book.cover" :alt="book.title" />
-      <button class="fav-btn" @click.stop="$emit('favorite')">{{ book.isFavorite ? '★' : '☆' }}</button>
+  <div class="book-card" @click="emit('click', book.id)">
+    <div class="book-cover" :style="{ background: getCoverColor(book.title) }">
+      {{ getInitials(book.title) }}
+      <button
+        v-if="book.isFavorite"
+        class="fav-badge"
+        @click.stop="emit('favorite', book.id)"
+      >★</button>
     </div>
-    <div class="info">
-      <h3>{{ book.title }}</h3>
-      <p>{{ book.author }}</p>
-      <div class="meta">
-        <span class="category">{{ book.category }}</span>
-        <span v-if="book.progress > 0" class="progress">{{ book.progress }}%</span>
+    <div class="book-info">
+      <div class="book-title">{{ book.title }}</div>
+      <div class="book-author">{{ book.author }}</div>
+      <div class="book-footer">
+        <span class="badge badge-accent">{{ book.category }}</span>
+        <span v-if="book.progress > 0" class="book-progress">{{ Math.round(book.progress) }}%</span>
       </div>
-    </div>
-    <div v-if="book.progress > 0" class="progress-bar">
-      <div class="fill" :style="{ width: book.progress + '%' }"></div>
+      <div v-if="book.progress > 0" class="progress-bar">
+        <div class="progress-fill" :style="{ width: book.progress + '%' }" />
+      </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import type { Book } from '@/types'
-
-defineProps<{
-  book: Book
-}>()
-
-defineEmits<{
-  click: []
-  favorite: []
-}>()
-</script>
-
-<style scoped lang="scss">
+<style scoped>
 .book-card {
   background: var(--bg-card);
-  border-radius: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-base);
+}
 
-  &:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent-cyan);
-    box-shadow: 0 8px 32px rgba(0, 240, 255, 0.15);
-  }
+.book-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+}
 
-  .cover {
-    position: relative;
-    height: 140px;
-    background: linear-gradient(135deg, var(--bg-panel), var(--bg-card));
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.book-cover {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  position: relative;
+}
 
-    .placeholder {
-      font-size: 48px;
-      font-weight: 800;
-      color: var(--accent-gold);
-    }
+.fav-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-size: 1.2rem;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+.book-info {
+  padding: 12px 14px;
+}
 
-    .fav-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.5);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
-      color: var(--accent-gold);
-      cursor: pointer;
-    }
-  }
+.book-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  .info {
-    padding: 12px;
+.book-author {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
 
-    h3 {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+.book-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
 
-    p {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
+.book-progress {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 500;
+}
 
-    .meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+.progress-bar {
+  height: 3px;
+  background: var(--bg-hover);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
 
-      .category {
-        font-size: 10px;
-        padding: 4px 8px;
-        background: rgba(0, 240, 255, 0.1);
-        color: var(--accent-cyan);
-        border-radius: 8px;
-      }
-
-      .progress {
-        font-size: 12px;
-        color: var(--accent-gold);
-      }
-    }
-  }
-
-  .progress-bar {
-    height: 3px;
-    background: rgba(255, 255, 255, 0.1);
-
-    .fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
-      transition: width 0.3s ease;
-    }
-  }
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 </style>

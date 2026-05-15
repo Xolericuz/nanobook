@@ -5,12 +5,12 @@ export function useOffline() {
   const wasOffline = ref(false)
 
   function handleOnline() {
-    wasOffline.value = false
     isOnline.value = true
+    wasOffline.value = true
+    setTimeout(() => { wasOffline.value = false }, 3000)
   }
 
   function handleOffline() {
-    wasOffline.value = true
     isOnline.value = false
   }
 

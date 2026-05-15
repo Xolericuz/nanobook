@@ -1,27 +1,30 @@
+<script setup lang="ts">
+withDefaults(defineProps<{
+  hover?: boolean
+  padding?: string
+}>(), {
+  hover: false,
+  padding: '20px',
+})
+</script>
+
 <template>
-  <div class="app-card" :class="{ hoverable }">
+  <div :class="['card', { 'card-hover': hover }]" :style="{ padding }">
     <slot />
   </div>
 </template>
 
-<script setup lang="ts">
-defineProps<{
-  hoverable?: boolean
-}>()
-</script>
-
-<style scoped lang="scss">
-.app-card {
+<style scoped>
+.card {
   background: var(--bg-card);
-  border-radius: 16px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
 
-  &.hoverable:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent-cyan);
-    box-shadow: 0 8px 32px rgba(0, 240, 255, 0.15);
-  }
+.card-hover:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.12);
 }
 </style>

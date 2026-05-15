@@ -1,40 +1,39 @@
-<template>
-  <button class="category-chip" :class="{ active }" @click="$emit('click')">
-    {{ category }}
-  </button>
-</template>
-
 <script setup lang="ts">
 defineProps<{
-  category: string
   active?: boolean
-}>()
-
-defineEmits<{
-  click: []
 }>()
 </script>
 
-<style scoped lang="scss">
-.category-chip {
-  padding: 8px 16px;
+<template>
+  <button :class="['chip', { active }]">
+    <slot />
+  </button>
+</template>
+
+<style scoped>
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: var(--text-muted);
-  font-size: 14px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
+}
 
-  &:hover {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-  }
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
-  &.active {
-    background: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-    color: #000;
-  }
+.chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
 }
 </style>

@@ -1,53 +1,49 @@
-<template>
-  <header class="app-header">
-    <div class="left">
-      <button v-if="back" class="back-btn" @click="$emit('back')">←</button>
-      <h1 v-if="title">{{ title }}</h1>
-    </div>
-    <div class="right">
-      <slot />
-    </div>
-  </header>
-</template>
-
 <script setup lang="ts">
 defineProps<{
-  title?: string
-  back?: boolean
+  title: string
+  showBack?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   back: []
 }>()
 </script>
 
-<style scoped lang="scss">
+<template>
+  <header class="app-header">
+    <div class="header-left">
+      <button v-if="showBack" class="btn btn-ghost btn-icon" @click="emit('back')">←</button>
+      <h1 class="header-title">{{ title }}</h1>
+    </div>
+    <div class="header-right">
+      <slot name="actions" />
+    </div>
+  </header>
+</template>
+
+<style scoped>
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 0;
+  margin-bottom: 24px;
+}
 
-  .left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-    h1 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-  }
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
 
-  .back-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: var(--text-main);
-    cursor: pointer;
-  }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>
