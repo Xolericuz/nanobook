@@ -6,7 +6,7 @@
   "packageManager": "npm@10.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cp workers-site/index.js dist/worker.js",
     "preview": "vite preview",
     "ai": "node server/xoleric-ai.js",
     "agents": "node server/autonomous.js"
