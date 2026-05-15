@@ -1,31 +1,28 @@
 {
   "name": "xoleric",
+  "version": "2.0.0",
   "private": true,
-  "version": "1.0.0",
   "type": "module",
-  "packageManager": "npm@10.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "ai": "node server/xoleric-ai.js",
-    "agents": "node server/autonomous.js"
+    "backend": "cd backend && uvicorn main:app --reload --port 8000",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "dependencies": {
-    "dexie": "^3.2.7",
-    "express": "^5.2.1",
-    "pinia": "^2.1.7",
-    "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
-    "vue": "^3.4.21",
+    "vue": "^3.4.0",
+    "pinia": "^2.1.0",
     "vue-router": "^4.3.0",
-    "@cloudflare/kv-asset-handler": "^0.3.0"
+    "dexie": "^3.2.0",
+    "socket.io-client": "^4.8.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^6.4.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.4.0",
     "sass": "^1.72.0",
-    "typescript": "^5.4.2",
-    "vite": "^6.0.0",
-    "vue-tsc": "^2.0.6"
+    "vue-tsc": "^2.0.0"
   }
 }

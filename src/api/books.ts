@@ -22,4 +22,7 @@ export const booksApi = {
 
   getCategories: () =>
     api.get<{ name: string; count: number }[]>('/books/categories'),
+
+  getStats: () =>
+    api.get<{ total: number; completed: number; favorites: number; reading: number }>('/books/stats'),
 }

@@ -3,12 +3,9 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBooksStore } from '@/stores/books'
 import { useUserStore } from '@/stores/user'
-import { useSettingsStore } from '@/stores/settings'
-
 const router = useRouter()
 const booksStore = useBooksStore()
 const userStore = useUserStore()
-const settingsStore = useSettingsStore()
 
 const stats = computed(() => booksStore.stats)
 const recent = computed(() => booksStore.recentlyRead)

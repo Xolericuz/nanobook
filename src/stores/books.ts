@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Book, ReadingProgress, BookFilters } from '@/types'
 import { booksApi } from '@/api/books'
-import { getAllBooks, getBookById, addBook, updateBookProgress, searchBooks, getBooksByCategory, getFavorites } from '@/utils/db'
+import { getAllBooks, getBookById, addBook, updateBookProgress } from '@/utils/db'
 
 export const useBooksStore = defineStore('books', () => {
   const books = ref<Book[]>([])

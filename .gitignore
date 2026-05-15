@@ -1,22 +1,11 @@
 node_modules/
 dist/
-.env
-.env.local
-.env.bak
-*.log
-.DS_Store
-package-lock.json
-npm-debug.log
-
-# Generated files
-generated-books/*.json
-!.gitkeep
-
-# Python
 __pycache__/
 *.pyc
-backend/*.db
-backend/data/
-.venv/
-venv/
-*.egg-info/
+.env
+*.db
+*.sqlite3
+.DS_Store
+*.log
+backend/__pycache__/
+scripts/__pycache__/
